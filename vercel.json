@@ -3,7 +3,7 @@
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "./hapi.js"
+        "dest": "hapi.js"
       }
     ]
   }
