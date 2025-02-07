@@ -1,0 +1,96 @@
+/* eslint-disable no-undef */
+const Genre = [
+    {
+        id : 1,
+        title: "Dupstep",
+        images: "./Images/1.jpg",
+        Seller : "Mas Amba",
+        SellerID: "b9cvbcvb9c",
+        Username : 'Unkno',
+        origin : '29871',
+        weight: "1000",
+        content: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias,vel blanditiis at hic cupiditate sapiente ipsa consequatur eaque minima / magnam fuga quia aperiam veniam iure corrupti voluptatem reiciendis facere reprehenderit?",
+        kind : ['1','2','3','4'],
+        price: [10000,20000,30000,4000],
+        stok : [4,10,2,3],
+    },
+    {
+        id : 2,
+        title: "Progresive",
+        images: "./Images/2.jpg",
+        Seller : "Azriel",
+        SellerID: "ml1m2lm24",
+        origin : '29871',
+        weight: "1000",
+        Username : 'Unkno',
+        content: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias,vel blanditiis at hic cupiditate sapiente ipsa consequatur eaque minima ",
+        kind : ['1','2','3','4'],
+        price : [10000,20000,30000,4000],
+        stok : [4,10,2,3],
+        
+    },
+    {
+        id : 3,
+        title: "Trap",
+        images: "./Images/3.jpg",
+        Seller : "Mas Amba",
+        SellerID: "N421KNK214N",
+        origin : '29871',
+        weight: "1000",
+        Username : 'Unkno',
+        content: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias,vel blanditiis at hic cupiditate sapiente ipsa consequatur eaque minima  magnam fuga quia aperiam veniam iure corrupti voluptatem reiciendis facere reprehenderit?",
+        kind : ['1','2','3','4'],
+        price : [10000,20000,30000,4000],
+        stok : [4,10,2,3],
+    },
+    {
+        id : 4,
+        title: "Jungle Dutch",
+        images: "./Images/3.jpg",
+        Seller : "Azriel",
+        SellerID: "tre6tery",
+        origin : '29871',
+        weight: "1000",
+        Username : 'Unkno',
+        content: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias,vel blanditiis at hic cupiditate sapiente ipsa consequatur eaque minima  magnam fuga quia aperiam veniam iure corrupti voluptatem reiciendis facere reprehenderit?",
+        kind : ['1','2','3','4'],
+        price : [10000,20000,30000,4000],
+        stok : [4,10,2,3],
+    }, 
+    {
+        id : 5,
+        title: "Experimental",
+        images: "./Images/3.jpg",
+        Seller : "Azriel",
+        SellerID: "41n4k2nj43",
+        origin : '29871',
+        weight: "1000",
+        Username : 'Unkno',
+        content: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias,vel blanditiis at hic cupiditate sapiente ipsa consequatur eaque minima  magnam fuga quia aperiam veniam iure corrupti voluptatem reiciendis facere reprehenderit?",
+        kind : ['1','2','3','4'],
+        price : [10000,20000,30000,4000],
+        stok : [4,10,2,3],
+    },
+    {
+        id : 6,
+        title: "PsyTrance",
+        images: "./Images/1.jpg",
+        Seller : "Andre",
+        SellerID : "LN4K1N2KJ4N2N4",
+        origin : '29871',
+        weight: "1000",
+        Username : 'Unkno',
+        content: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Alias,vel blanditiis at hic cupiditate sapiente ipsa consequatur eaque minima / magnam fuga quia aperiam veniam iure corrupti voluptatem reiciendis facere reprehenderit?",
+        kind : ['1','2','3','4'],
+        price : [10000,20000,30000,4000],
+        stok : [4,10,2,3],
+    },
+];
+
+
+const account = [];
+const Cart = []
+module.exports = {Genre, account,Cart};
+
+
+

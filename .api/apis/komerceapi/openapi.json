@@ -1,0 +1,972 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RajaOngkir API V2",
+    "version": "unknown"
+  },
+  "servers": [
+    {
+      "url": "https://rajaongkir.komerce.id/api/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "sec0": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "key"
+      }
+    }
+  },
+  "security": [
+    {
+      "sec0": []
+    }
+  ],
+  "paths": {
+    "/destination/domestic-destination": {
+      "get": {
+        "summary": "Search Domestics Destination",
+        "description": "The Search Destination Endpoint is designed to help you locate specific destinations within Indonesia based on search keywords. It provides detailed information about destinations, including their city and province. This feature is ideal for building applications like shipping calculators, e-commerce checkout systems, or any service that requires precise location-based data.  This guide explains how to utilize the endpoint, covering setup, request parameters, responses, and practical examples.",
+        "operationId": "search-destination-rajaongkir",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "header",
+            "description": "Every request to this endpoint must include a valid API key in the request header. Your API key is your unique identifier and ensures secure access to the service.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "YOUR_API_KEY"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Keyword for searching the destination.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return. Default: 10.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "The starting position for the results (for pagination). Default: 0.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"Success Get Domestic Destinations\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"id\": 31555,\n            \"label\": \"SINDUHARJO, NGAGLIK, SLEMAN, DI YOGYAKARTA, 55581\",\n            \"subdistrict_name\": \"SINDUHARJO\",\n            \"district_name\": \"NGAGLIK\",\n            \"city_name\": \"SLEMAN\",\n            \"province_name\": \"DI YOGYAKARTA\",\n            \"zip_code\": \"55581\"\n        }\n    ]\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Success Get Domestic Destinations"
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 200,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer",
+                            "example": 31555,
+                            "default": 0
+                          },
+                          "label": {
+                            "type": "string",
+                            "example": "SINDUHARJO, NGAGLIK, SLEMAN, DI YOGYAKARTA, 55581"
+                          },
+                          "subdistrict_name": {
+                            "type": "string",
+                            "example": "SINDUHARJO"
+                          },
+                          "district_name": {
+                            "type": "string",
+                            "example": "NGAGLIK"
+                          },
+                          "city_name": {
+                            "type": "string",
+                            "example": "SLEMAN"
+                          },
+                          "province_name": {
+                            "type": "string",
+                            "example": "DI YOGYAKARTA"
+                          },
+                          "zip_code": {
+                            "type": "string",
+                            "example": "55581"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"Invalid Api key, key not found\",\n        \"code\": 400,\n        \"status\": \"failed\"\n    },\n    \"data\": null\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid Api key, key not found"
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 400,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "failed"
+                        }
+                      }
+                    },
+                    "data": {}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "404",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"Domestic Destinations Data not found\",\n        \"code\": 404,\n        \"status\": \"error\"\n    },\n    \"data\": null\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Domestic Destinations Data not found"
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 404,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "error"
+                        }
+                      }
+                    },
+                    "data": {}
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "422",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"search: cannot be blank.\",\n        \"code\": 422,\n        \"status\": \"error\"\n    },\n    \"data\": null\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "search: cannot be blank."
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 422,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "error"
+                        }
+                      }
+                    },
+                    "data": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl --location 'https://rajaongkir.komerce.id/api/v1/destination/domestic-destination?search=sinduharjo&limit=5&offset=0' \\\n--header 'key: YOUR_API_KEY'"
+            }
+          ],
+          "samples-languages": [
+            "curl"
+          ]
+        }
+      }
+    },
+    "/destination/international-destination": {
+      "get": {
+        "summary": "Search International Destination",
+        "description": "The Search International Destination Endpoint is designed to simplify the process of finding international destinations based on a search keyword. This endpoint is particularly useful for businesses that operate across borders, such as e-commerce platforms, shipping companies, or logistics providers. By providing access to international destination data, the API ensures accurate and efficient processing of global shipping needs.",
+        "operationId": "search-international-destination",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Keyword to search for an international destination.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return. Default: 10.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Starting position for the results, useful for pagination. Default: 0.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "key",
+            "in": "header",
+            "description": "Your API authentication key.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "YOUR_API_KEY"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"Success Get International Destination\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"country_id\": \"108\",\n            \"country_name\": \"Malaysia\"\n        }\n    ]\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Success Get International Destination"
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 200,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "country_id": {
+                            "type": "string",
+                            "example": "108"
+                          },
+                          "country_name": {
+                            "type": "string",
+                            "example": "Malaysia"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl --location 'https://rajaongkir.komerce.id/api/v1/destination/international-destination?search=malaysia&limit=20&offset=0' \\\n--header 'key: YOUR_API_KEY'"
+            }
+          ],
+          "samples-languages": [
+            "curl"
+          ]
+        }
+      }
+    },
+    "/calculate/domestic-cost": {
+      "post": {
+        "summary": "Calculate Domestic Cost",
+        "description": "",
+        "operationId": "calculate-domestic-cost",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "header",
+            "description": "API key for authorization.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "default": "YOUR_API_KEY"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "origin",
+                  "destination",
+                  "weight",
+                  "courier"
+                ],
+                "properties": {
+                  "origin": {
+                    "type": "string",
+                    "description": "The ID unique of postal code, sub district, or district for the origin location."
+                  },
+                  "destination": {
+                    "type": "string",
+                    "description": "The ID unique of postal code, sub district, or district for the destination location."
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "description": "The weight of the package in grams (e.g., 1000 for 1kg).",
+                    "format": "int32"
+                  },
+                  "courier": {
+                    "type": "string",
+                    "description": "Colon-separated courier codes (e.g., jne:sicepat:jnt)."
+                  },
+                  "price": {
+                    "type": "string",
+                    "description": "Filter for price sorting (lowest or highest). Default is lowest."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"Success Calculate Domestic Shipping cost\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"name\": \"Nusantara Card Semesta\",\n            \"code\": \"ncs\",\n            \"service\": \"DARAT\",\n            \"description\": \"Regular Darat\",\n            \"cost\": 8000,\n            \"etd\": \"6-7 day\"\n        },\n        {\n            \"name\": \"Nusantara Card Semesta\",\n            \"code\": \"ncs\",\n            \"service\": \"NRS\",\n            \"description\": \"Regular Service\",\n            \"cost\": 13000,\n            \"etd\": \"5-6 day\"\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"ECO\",\n            \"description\": \"Economy Service\",\n            \"cost\": 15000,\n            \"etd\": \"5 day\"\n        },\n        {\n            \"name\": \"ID Express\",\n            \"code\": \"ide\",\n            \"service\": \"STD\",\n            \"description\": \"Std\",\n            \"cost\": 15500,\n            \"etd\": \"0-0 day\"\n        },\n        {\n            \"name\": \"SiCepat Express\",\n            \"code\": \"sicepat\",\n            \"service\": \"REG\",\n            \"description\": \"Reguler\",\n            \"cost\": 15900,\n            \"etd\": \"3-5 day\"\n        },\n        {\n            \"name\": \"J&T Express\",\n            \"code\": \"jnt\",\n            \"service\": \"EZ\",\n            \"description\": \"Reguler\",\n            \"cost\": 16000,\n            \"etd\": \"\"\n        },\n        {\n            \"name\": \"POS Indonesia (POS)\",\n            \"code\": \"pos\",\n            \"service\": \"Pos Reguler\",\n            \"description\": \"Pos Reguler\",\n            \"cost\": 16000,\n            \"etd\": \"4 day\"\n        },\n        {\n            \"name\": \"POS Indonesia (POS)\",\n            \"code\": \"pos\",\n            \"service\": \"Pos Nextday\",\n            \"description\": \"Pos Nextday\",\n            \"cost\": 16500,\n            \"etd\": \"1 day\"\n        },\n        {\n            \"name\": \"Royal Express Indonesia (REX)\",\n            \"code\": \"rex\",\n            \"service\": \"REG\",\n            \"description\": \"Regular\",\n            \"cost\": 17000,\n            \"etd\": \"7-7 day\"\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"REG\",\n            \"description\": \"Reguler Service\",\n            \"cost\": 18000,\n            \"etd\": \"3 day\"\n        },\n        {\n            \"name\": \"Jalur Nugraha Ekakurir (JNE)\",\n            \"code\": \"jne\",\n            \"service\": \"REG\",\n            \"description\": \"Layanan Reguler\",\n            \"cost\": 18000,\n            \"etd\": \"6 day\"\n        },\n        {\n            \"name\": \"Ninja Xpress\",\n            \"code\": \"ninja\",\n            \"service\": \"STANDARD\",\n            \"description\": \"Standard Service\",\n            \"cost\": 18000,\n            \"etd\": \"\"\n        },\n        {\n            \"name\": \"POS Indonesia (POS)\",\n            \"code\": \"pos\",\n            \"service\": \"PAKETPOS DANGEROUS GOODS\",\n            \"description\": \"Paketpos Dangerous Goods\",\n            \"cost\": 18000,\n            \"etd\": \"4 day\"\n        },\n        {\n            \"name\": \"POS Indonesia (POS)\",\n            \"code\": \"pos\",\n            \"service\": \"PAKETPOS VALUABLE GOODS\",\n            \"description\": \"Paketpos Valuable Goods\",\n            \"cost\": 18000,\n            \"etd\": \"4 day\"\n        },\n        {\n            \"name\": \"AnterAja\",\n            \"code\": \"anteraja\",\n            \"service\": \"REG\",\n            \"description\": \"Anteraja Regular\",\n            \"cost\": 20000,\n            \"etd\": \"2-4 day\"\n        },\n        {\n            \"name\": \"Satria Antaran Prima\",\n            \"code\": \"sap\",\n            \"service\": \"UDRREG\",\n            \"description\": \"Reguler\",\n            \"cost\": 21000,\n            \"etd\": \"2-4 day\"\n        },\n        {\n            \"name\": \"Royal Express Indonesia (REX)\",\n            \"code\": \"rex\",\n            \"service\": \"EXP\",\n            \"description\": \"Express\",\n            \"cost\": 25000,\n            \"etd\": \"5-5 day\"\n        },\n        {\n            \"name\": \"Satria Antaran Prima\",\n            \"code\": \"sap\",\n            \"service\": \"DRGREG\",\n            \"description\": \"Cargo\",\n            \"cost\": 45000,\n            \"etd\": \"3-5 day\"\n        },\n        {\n            \"name\": \"SiCepat Express\",\n            \"code\": \"sicepat\",\n            \"service\": \"GOKIL\",\n            \"description\": \"Cargo Per Kg (Minimal 10kg)\",\n            \"cost\": 70000,\n            \"etd\": \"4-8 day\"\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"TRC\",\n            \"description\": \"Trucking\",\n            \"cost\": 75000,\n            \"etd\": \"7 day\"\n        },\n        {\n            \"name\": \"Jalur Nugraha Ekakurir (JNE)\",\n            \"code\": \"jne\",\n            \"service\": \"JTR\",\n            \"description\": \"JNE Trucking\",\n            \"cost\": 90000,\n            \"etd\": \"5 day\"\n        },\n        {\n            \"name\": \"Jalur Nugraha Ekakurir (JNE)\",\n            \"code\": \"jne\",\n            \"service\": \"JTR<130\",\n            \"description\": \"JNE Trucking\",\n            \"cost\": 200000,\n            \"etd\": \"5 day\"\n        },\n        {\n            \"name\": \"Jalur Nugraha Ekakurir (JNE)\",\n            \"code\": \"jne\",\n            \"service\": \"JTR>130\",\n            \"description\": \"JNE Trucking\",\n            \"cost\": 600000,\n            \"etd\": \"5 day\"\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"T15\",\n            \"description\": \"Motor Di Bawah 150cc\",\n            \"cost\": 880000,\n            \"etd\": \"7 day\"\n        },\n        {\n            \"name\": \"Jalur Nugraha Ekakurir (JNE)\",\n            \"code\": \"jne\",\n            \"service\": \"JTR>200\",\n            \"description\": \"JNE Trucking\",\n            \"cost\": 900000,\n            \"etd\": \"5 day\"\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"T25\",\n            \"description\": \"Motor Di Bawah 250cc\",\n            \"cost\": 1140000,\n            \"etd\": \"7 day\"\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"T60\",\n            \"description\": \"Motor Di Bawah 600cc\",\n            \"cost\": 1400000,\n            \"etd\": \"7 day\"\n        }\n    ]\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Success Calculate Domestic Shipping cost"
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 200,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Nusantara Card Semesta"
+                          },
+                          "code": {
+                            "type": "string",
+                            "example": "ncs"
+                          },
+                          "service": {
+                            "type": "string",
+                            "example": "DARAT"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Regular Darat"
+                          },
+                          "cost": {
+                            "type": "integer",
+                            "example": 8000,
+                            "default": 0
+                          },
+                          "etd": {
+                            "type": "string",
+                            "example": "6-7 day"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl --location 'https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost' \\\n--header 'key: YOUR_API_KEY' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'origin=31555' \\\n--data-urlencode 'destination=68423' \\\n--data-urlencode 'weight=1000' \\\n--data-urlencode 'courier=jne:sicepat:ide:sap:jnt:ninja:tiki:lion:anteraja:pos:ncs:rex:rpx:sentral:star:wahana:dse' \\\n--data-urlencode 'price=lowest'"
+            }
+          ],
+          "samples-languages": [
+            "curl"
+          ]
+        }
+      }
+    },
+    "/calculate/international-cost": {
+      "post": {
+        "summary": "Calculate International Cost",
+        "description": "",
+        "operationId": "calculate-international-cost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "courier",
+                  "origin",
+                  "destination",
+                  "weight"
+                ],
+                "properties": {
+                  "courier": {
+                    "type": "string",
+                    "description": "Colon-separated courier codes (e.g., tiki:lion:pos:expedito:jne)."
+                  },
+                  "origin": {
+                    "type": "string",
+                    "description": "The ID unique of the origin location"
+                  },
+                  "destination": {
+                    "type": "string",
+                    "description": "The ID unique of the destination location"
+                  },
+                  "weight": {
+                    "type": "integer",
+                    "description": "The package weight in grams (e.g., 500 for 500g).",
+                    "format": "int32"
+                  },
+                  "price": {
+                    "type": "string",
+                    "description": "Sort order for price (lowest or highest). Default is Random."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"Success Calculate International Shipping Cost\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"name\": \"Rayspeed Indonesia\",\n            \"code\": \"ray\",\n            \"service\": \"Regular Service\",\n            \"description\": \"Retail\",\n            \"currency\": \"IDR\",\n            \"cost\": 55000,\n            \"etd\": \"\"\n        },\n        {\n            \"name\": \"Lion Parcel\",\n            \"code\": \"lion\",\n            \"service\": \"INTERPACK\",\n            \"description\": \"Active\",\n            \"currency\": \"IDR\",\n            \"cost\": 65000,\n            \"etd\": \"2-3 day\"\n        },\n        {\n            \"name\": \"Rayspeed Indonesia\",\n            \"code\": \"ray\",\n            \"service\": \"Express Service\",\n            \"description\": \"Retail\",\n            \"currency\": \"IDR\",\n            \"cost\": 85000,\n            \"etd\": \"\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"SkyNet Worldwide\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 91000,\n            \"etd\": \"3-5 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"NINJA VAN\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 95000,\n            \"etd\": \"4-6 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"CityLink Express\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 101000,\n            \"etd\": \"4-6 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"ARAMEX Indonesia\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 115000,\n            \"etd\": \"3-5 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"Moon Forwarder (REG)\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 125000,\n            \"etd\": \"3-5 day\"\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"WDX\",\n            \"description\": \"World Document Express\",\n            \"currency\": \"IDR\",\n            \"cost\": 130008,\n            \"etd\": \"-\",\n            \"currency_updated_at\": \"30-12-2024\",\n            \"currency_value\": 16251\n        },\n        {\n            \"name\": \"Citra Van Titipan Kilat (TIKI)\",\n            \"code\": \"tiki\",\n            \"service\": \"WPX\",\n            \"description\": \"World Parcel Express\",\n            \"currency\": \"IDR\",\n            \"cost\": 130008,\n            \"etd\": \"-\",\n            \"currency_updated_at\": \"30-12-2024\",\n            \"currency_value\": 16251\n        },\n        {\n            \"name\": \"Jalur Nugraha Ekakurir (JNE)\",\n            \"code\": \"jne\",\n            \"service\": \"INTL Service\",\n            \"description\": \"Paket\",\n            \"currency\": \"IDR\",\n            \"cost\": 133000,\n            \"etd\": \"2-3 day\"\n        },\n        {\n            \"name\": \"Jalur Nugraha Ekakurir (JNE)\",\n            \"code\": \"jne\",\n            \"service\": \"INTL Service\",\n            \"description\": \"Document\",\n            \"currency\": \"IDR\",\n            \"cost\": 133000,\n            \"etd\": \"2-3 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"SF EXPRESS\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 272000,\n            \"etd\": \"5-8 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"Fedex International Economy\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 484000,\n            \"etd\": \"2-3 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"DHL JKT\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 537000,\n            \"etd\": \"1-3 day\"\n        },\n        {\n            \"name\": \"Expedito\",\n            \"code\": \"expedito\",\n            \"service\": \"DHL e-Commerce\",\n            \"description\": \"\",\n            \"currency\": \"IDR\",\n            \"cost\": 572000,\n            \"etd\": \"1-3 day\"\n        }\n    ]\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Success Calculate International Shipping Cost"
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 200,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "Rayspeed Indonesia"
+                          },
+                          "code": {
+                            "type": "string",
+                            "example": "ray"
+                          },
+                          "service": {
+                            "type": "string",
+                            "example": "Regular Service"
+                          },
+                          "description": {
+                            "type": "string",
+                            "example": "Retail"
+                          },
+                          "currency": {
+                            "type": "string",
+                            "example": "IDR"
+                          },
+                          "cost": {
+                            "type": "integer",
+                            "example": 55000,
+                            "default": 0
+                          },
+                          "etd": {
+                            "type": "string",
+                            "example": ""
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl --location 'https://rajaongkir.komerce.id/api/v1/calculate/international-cost' \\\n--header 'key: YOUR_API_KEY' \\\n--header 'Content-Type: application/x-www-form-urlencoded' \\\n--data-urlencode 'courier=tiki:lion:pos:expedito:ray:jne' \\\n--data-urlencode 'origin=17521' \\\n--data-urlencode 'destination=152' \\\n--data-urlencode 'weight=500' \\\n--data-urlencode 'price=lowest'"
+            }
+          ],
+          "samples-languages": [
+            "curl"
+          ]
+        }
+      }
+    },
+    "/track/waybill": {
+      "post": {
+        "summary": "Tracking Airwaybills",
+        "description": "",
+        "operationId": "tracking-airwaybills",
+        "parameters": [
+          {
+            "name": "awb",
+            "in": "query",
+            "description": "The airwaybill (AWB) number of the package.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "courier",
+            "in": "query",
+            "description": "The courier code (e.g., wahana).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "in": "header",
+            "description": "Your API authentication key.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{\n    \"meta\": {\n        \"message\": \"Success Get Waybill\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"delivered\": true,\n        \"summary\": {\n            \"courier_code\": \"wahana\",\n            \"courier_name\": \"Wahana Prestasi Logistik\",\n            \"waybill_number\": \"MT685U91\",\n            \"service_code\": \"\",\n            \"waybill_date\": \"2024-10-08\",\n            \"shipper_name\": \"TOKO ALAT LUKIS (08112XXXXXX)\",\n            \"receiver_name\": \"FIKRI EL SARA (085668XXXXXX)\",\n            \"origin\": \"\",\n            \"destination\": \"di Kota Sukabumi\",\n            \"status\": \"DELIVERED\"\n        },\n        \"details\": {\n            \"waybill_number\": \"MT685U91\",\n            \"waybill_date\": \"2024-10-08\",\n            \"waybill_time\": \"11:14:29\",\n            \"weight\": \"\",\n            \"origin\": \"\",\n            \"destination\": \"di Kota Sukabumi\",\n            \"shipper_name\": \"TOKO ALAT LUKIS (08112XXXXXX)\",\n            \"shipper_address1\": \"\",\n            \"shipper_address2\": \"\",\n            \"shipper_address3\": \"\",\n            \"shipper_city\": \"\",\n            \"receiver_name\": \"FIKRI EL SARA (085668XXXXXX)\",\n            \"receiver_address1\": \"\",\n            \"receiver_address2\": \"\",\n            \"receiver_address3\": \"\",\n            \"receiver_city\": \"di Kota Sukabumi\"\n        },\n        \"delivery_status\": {\n            \"status\": \"DELIVERED\",\n            \"pod_receiver\": \"FIKRI EL SARA (085668XXXXXX)\",\n            \"pod_date\": \"2024-10-11\",\n            \"pod_time\": \"09:26:13\"\n        },\n        \"manifest\": [\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Diterima di Sales Counter AGEN WPL BANTUL NGESTIHARJO MADUMURTI 50\",\n                \"manifest_date\": \"2024-10-08\",\n                \"manifest_time\": \"11:14:29\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Di pick-up oleh petugas WAHANA Bantul\",\n                \"manifest_date\": \"2024-10-08\",\n                \"manifest_time\": \"20:04:18\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Diterima di fasilitas WAHANA HUB Jawa 3\",\n                \"manifest_date\": \"2024-10-08\",\n                \"manifest_time\": \"21:51:16\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Pengiriman dari WAHANA HUB Jawa 3 ke WAHANA HUB Jakarta Cawang\",\n                \"manifest_date\": \"2024-10-08\",\n                \"manifest_time\": \"22:12:31\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Diterima di fasilitas WAHANA HUB Jawa 5\",\n                \"manifest_date\": \"2024-10-09\",\n                \"manifest_time\": \"10:01:52\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Diterima di fasilitas WAHANA HUB Jakarta Cawang\",\n                \"manifest_date\": \"2024-10-10\",\n                \"manifest_time\": \"05:57:16\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Diterima di fasilitas WAHANA HUB Jakarta 3\",\n                \"manifest_date\": \"2024-10-10\",\n                \"manifest_time\": \"08:31:21\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Proses pengiriman ke alamat tujuan\",\n                \"manifest_date\": \"2024-10-10\",\n                \"manifest_time\": \"09:30:04\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Diterima di fasilitas WAHANA Bogor\",\n                \"manifest_date\": \"2024-10-11\",\n                \"manifest_time\": \"06:58:42\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Proses pengantaran oleh kurir WAHANA Bogor,  \",\n                \"manifest_date\": \"2024-10-11\",\n                \"manifest_time\": \"08:20:50\",\n                \"city_name\": \"\"\n            },\n            {\n                \"manifest_code\": \"\",\n                \"manifest_description\": \"Diterima oleh FIKRI EL SARA (Penerima Langsung)\",\n                \"manifest_date\": \"2024-10-11\",\n                \"manifest_time\": \"09:26:13\",\n                \"city_name\": \"\"\n            }\n        ]\n    }\n}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "example": "Success Get Waybill"
+                        },
+                        "code": {
+                          "type": "integer",
+                          "example": 200,
+                          "default": 0
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "success"
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "delivered": {
+                          "type": "boolean",
+                          "example": true,
+                          "default": true
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "courier_code": {
+                              "type": "string",
+                              "example": "wahana"
+                            },
+                            "courier_name": {
+                              "type": "string",
+                              "example": "Wahana Prestasi Logistik"
+                            },
+                            "waybill_number": {
+                              "type": "string",
+                              "example": "MT685U91"
+                            },
+                            "service_code": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "waybill_date": {
+                              "type": "string",
+                              "example": "2024-10-08"
+                            },
+                            "shipper_name": {
+                              "type": "string",
+                              "example": "TOKO ALAT LUKIS (08112XXXXXX)"
+                            },
+                            "receiver_name": {
+                              "type": "string",
+                              "example": "FIKRI EL SARA (085668XXXXXX)"
+                            },
+                            "origin": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "destination": {
+                              "type": "string",
+                              "example": "di Kota Sukabumi"
+                            },
+                            "status": {
+                              "type": "string",
+                              "example": "DELIVERED"
+                            }
+                          }
+                        },
+                        "details": {
+                          "type": "object",
+                          "properties": {
+                            "waybill_number": {
+                              "type": "string",
+                              "example": "MT685U91"
+                            },
+                            "waybill_date": {
+                              "type": "string",
+                              "example": "2024-10-08"
+                            },
+                            "waybill_time": {
+                              "type": "string",
+                              "example": "11:14:29"
+                            },
+                            "weight": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "origin": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "destination": {
+                              "type": "string",
+                              "example": "di Kota Sukabumi"
+                            },
+                            "shipper_name": {
+                              "type": "string",
+                              "example": "TOKO ALAT LUKIS (08112XXXXXX)"
+                            },
+                            "shipper_address1": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "shipper_address2": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "shipper_address3": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "shipper_city": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "receiver_name": {
+                              "type": "string",
+                              "example": "FIKRI EL SARA (085668XXXXXX)"
+                            },
+                            "receiver_address1": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "receiver_address2": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "receiver_address3": {
+                              "type": "string",
+                              "example": ""
+                            },
+                            "receiver_city": {
+                              "type": "string",
+                              "example": "di Kota Sukabumi"
+                            }
+                          }
+                        },
+                        "delivery_status": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "DELIVERED"
+                            },
+                            "pod_receiver": {
+                              "type": "string",
+                              "example": "FIKRI EL SARA (085668XXXXXX)"
+                            },
+                            "pod_date": {
+                              "type": "string",
+                              "example": "2024-10-11"
+                            },
+                            "pod_time": {
+                              "type": "string",
+                              "example": "09:26:13"
+                            }
+                          }
+                        },
+                        "manifest": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "manifest_code": {
+                                "type": "string",
+                                "example": ""
+                              },
+                              "manifest_description": {
+                                "type": "string",
+                                "example": "Diterima di Sales Counter AGEN WPL BANTUL NGESTIHARJO MADUMURTI 50"
+                              },
+                              "manifest_date": {
+                                "type": "string",
+                                "example": "2024-10-08"
+                              },
+                              "manifest_time": {
+                                "type": "string",
+                                "example": "11:14:29"
+                              },
+                              "city_name": {
+                                "type": "string",
+                                "example": ""
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "400",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Result": {
+                    "value": "{}"
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "deprecated": false,
+        "x-readme": {
+          "code-samples": [
+            {
+              "language": "curl",
+              "code": "curl --location --request POST 'https://rajaongkir.komerce.id/api/v1/track/waybill?awb=MT685U91&courier=wahana' \\\n--header 'key: YOUR_API_KEY'"
+            }
+          ],
+          "samples-languages": [
+            "curl"
+          ]
+        }
+      }
+    }
+  },
+  "x-readme": {
+    "headers": []
+  },
+  "x-readme-fauxas": true
+}
