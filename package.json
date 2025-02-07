@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "build": "echo 'No build needed'",
-    "vercel-build": "echo 'No build needed'"
+    "start": "node server/index.js",
+    "build": "echo 'No build required'", 
+    "vercel-build": "echo 'No build required'"
   },
   "author": "",
   "license": "ISC",
