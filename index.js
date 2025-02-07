@@ -4,7 +4,6 @@ const data = require("./routes.js")
 const jwt = require("@hapi/jwt");
 const { Server } = require('socket.io');
 const { nanoid } = require("nanoid");
-const serverless = require('serverless-http');
 
 
 const storeConnections = {}
@@ -146,20 +145,11 @@ const init = async () => {
     await server.start();
     console.log((`Server berjalan pada ${server.info.uri}`));
 
-
-
-
-
-
 }
-let handler;
 
-module.exports.handler = async (req, res) => {
-  if (!handler) {
-    const server = await init();
-    handler = serverless(server.listener);
-  }
-  return handler(req, res);
-};
+init();
 
-module.exports = { storeConnections }
+module.exports = {init};
+
+
+
