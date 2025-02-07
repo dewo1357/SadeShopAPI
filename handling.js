@@ -6,9 +6,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const { supabase } = require('./supabase');
 const jwt = require('jsonwebtoken');
-const { Server } = require('socket.io');
-const { server } = require('@hapi/hapi');
-require("dotenv").config({ path: "src/.env" })
+require("dotenv").config({ path: ".env" })
 
 
 
