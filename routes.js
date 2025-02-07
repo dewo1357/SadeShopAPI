@@ -13,6 +13,16 @@ const { GetData, GetProdukBySeller, AddProduct, EditProduct,
 
 const routes = [
     {
+        method: "GET",
+        path: "/",
+        options: { auth: false },
+        handler: ()=>{
+            return{
+                'Message' : 'API IS RUNNING'
+            }
+        }
+    },
+    {
         method: "DELETE",
         path: "/DeleteChat/{idChat}",
         options: { auth: 'jwt-access' },

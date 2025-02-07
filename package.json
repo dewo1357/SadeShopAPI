@@ -4,14 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./src/server.js",
-    "dev": "nodemon ./src/server.js"
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@api/komerceapi": "file:.api/apis/komerceapi",
     "@hapi/hapi": "^21.3.12",
     "@hapi/jwt": "^3.2.0",
     "@supabase/supabase-js": "^2.47.13",
