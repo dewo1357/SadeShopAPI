@@ -83,12 +83,12 @@ const CheckedCheckout =  () => {
 let CheckOutArray = [];
 const CheckOut = async (request, h) => {
     const { username } = request.auth.credentials
-    console.log('checkout Dataaaaa')
-
     const { Name, courier, province,
         city, kecamatan, kodepos } = request.payload;
 
-    const CartToPayBasedOnUser = CartToPay.filter((item) => item.user === username)
+    const account = await select_data_user('Account', username, 'username')
+
+    const CartToPayBasedOnUser = CartToPay.filter((item) => item.userID === account[0].id)
 
     await Promise.all(
         CartToPayBasedOnUser.map(async (item) => {
@@ -124,6 +124,7 @@ const CheckOut = async (request, h) => {
                         transaction_id: resi.toString(),
                         origin: item.origin,
                         user: username,
+                        userID: item.userID,
                         Customer: Name,
                         courier: courier,
                         province: province,
@@ -152,6 +153,7 @@ const CheckOut = async (request, h) => {
                     transaction_id: resi.toString(),
                     origin: item.origin,
                     user: username,
+                    userID: item.userID,
                     Customer: Name,
                     courier: courier,
                     province: province,
@@ -176,13 +178,11 @@ const CheckOut = async (request, h) => {
             }
         })
     )
-    console.log(CheckOutArray)
-
 
     const response = h.response({
         status: 'Success',
         message: "Data Berhasil Di Dapatkan",
-        data: CheckOutArray.filter((item) => item.user === username)
+        data: CheckOutArray
     })
 
     response.code(200)
@@ -285,7 +285,7 @@ const FinishCheckout = async (request, h) => {
             Seller: item.Seller,
             SellerID: item.SellerID,
             totalPay: item.totalPay,
-            Username_Buyer: item.user,
+            BuyerAccountID: item.userID,
             Courier: pengiriman.name,
             Courier_code: pengiriman.code,
             Courier_Service: pengiriman.service,
@@ -366,7 +366,8 @@ const GetProcessOrder = async (request, h) => {
     const { username } = request.auth.credentials
     const { category } = request.params;
 
-    const getData = await getDataProcess(category, username, 'Username_Buyer')
+    const accountdata = await select_data_user('Account', username, "username")
+    const getData = await getDataProcess(category, accountdata[0].id, 'BuyerAccountID')
 
     if (getData.length != 0) {
         const response = h.response({
@@ -477,7 +478,9 @@ const GetData = async (request, h) => {
 
 const GetProdukBySeller = async (request, h) => {
     const { username } = request.auth.credentials;
-    let dataFilter = await select_data_user('Productku', username, 'Username')
+    const account = await select_data_user('Account', username, 'username')
+
+    let dataFilter = await select_data_user('Productku', account[0].id, 'SellerID')
     const response = h.response({
         status: "success",
         message: "Data Success Didapat",
@@ -553,11 +556,11 @@ const ChangeImageProfile = async (request, h) => {
             .order('timestamp', { ascending: false });
 
         Promise.all(
-            data.map( async(item) => {
+            data.map(async (item) => {
                 if (item.usernameSend === username) {
-                    await UpdateData('CategoryChat','usernameSend',username,[{SenderPictPathName:files.hapi.filename}])
+                    await UpdateData('CategoryChat', 'usernameSend', username, [{ SenderPictPathName: files.hapi.filename }])
                 } else {
-                    await UpdateData('CategoryChat','userReceive',username,[{ReceivePictPathName:files.hapi.filename}])
+                    await UpdateData('CategoryChat', 'userReceive', username, [{ ReceivePictPathName: files.hapi.filename }])
                 }
             })
         )
@@ -627,7 +630,6 @@ const AddProduct = async (request, h) => {
                 id: id,
                 Seller: Seller,
                 SellerID: SellerID,
-                Username: username,
                 URLimages: images,
                 title: title,
                 kind: kind,
@@ -725,24 +727,22 @@ const DeleteProduct = async (request, h) => {
 const GetAccountByUsername = async (request, h) => {
     const { username } = request.params
 
-    let { data, error } = await supabase
-        .from('Account')
-        .select('*')
-    const index = data.findIndex((item) => item.username === username);
-    const product = await select_data_user('Productku', username, 'Username')
+    const data = await select_data_user('Account', username, 'id')
+    const product = await select_data_user('Productku', data[0].id, 'SellerID')
 
-    if (index !== -1) {
+    if (data && product) {
         const response = h.response({
             status: "Success",
             message: "Account Didapatkan",
             account: {
-                nama: data[index].nama,
-                image: data[index].image,
-                username: data[index].username,
-                province: data[index].state,
-                city: data[index].city,
-                road: data[index].road,
-                postalCode: data[index].postalCode
+                nama: data[0].nama,
+                id: data[0].id,
+                image: data[0].image,
+                username: data[0].username,
+                province: data[0].state,
+                city: data[0].city,
+                road: data[0].road,
+                postalCode: data[0].postalCode
             },
             product: product
         })
@@ -774,7 +774,8 @@ const Get_Acces = async (request, h) => {
     const checkToken = await select_data_user('RefreshToken', refreshToken, 'refreshToken')
     if (checkToken.length !== 0) {
         console.log(checkToken)
-        const username = checkToken[0].username
+        const account = await select_data_user('Account', checkToken[0].idAccount, 'id')
+        const username = account[0].username
 
         const acces_token = jwt.sign(
             { username }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
@@ -812,22 +813,18 @@ const GetDataAccount = async (request, h) => {
         }
     }
 
-    let { data, error } = await supabase
-        .from('Account')
-        .select('*')
+    const data = await select_data_user('Account', username, 'username')
 
     const index = data.findIndex((item) => item.username === username)
 
     console.log("Login Berhasil " + new Date().toISOString())
 
 
-    if (index !== -1) {
-        const result = await bcrypt.compare(kata_sandi, data[index].kata_sandi);
+    if (data.length === 1) {
+        const result = await bcrypt.compare(kata_sandi, data[0].kata_sandi);
         console.log(result)
 
         if (result) {
-
-
             const acces_token = jwt.sign(
                 { username }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
             )
@@ -836,15 +833,14 @@ const GetDataAccount = async (request, h) => {
                 { username, kata_sandi }, SECRET_REFRESH_TOKEN, { 'expiresIn': 7 * 24 * 60 * 60 }
             )
 
-            const checked = await select_data_user('RefreshToken', username, 'username')
+            const checked = await select_data_user('RefreshToken', data[0].id, 'idAccount')
             console.log(checked)
             if (checked !== -1) {
-                await deleteData('RefreshToken', 'username', username)
+                await deleteData('RefreshToken', 'idAccount', data[0].id)
             }
 
             await Insert_Supabase('RefreshToken', {
-                username: data[index].username,
-                idAccount: data[index].id,
+                idAccount: data[0].id,
                 refreshToken: refresh_token
             })
 
@@ -878,7 +874,7 @@ const AddAccount = async (request, h) => {
         .from('Account')
         .select('*')
     data.map((item) => {
-        if (item.username === username) {
+        if (item.username === username || username.includes(" ")) {
             available = true;
         }
     })
@@ -898,7 +894,7 @@ const AddAccount = async (request, h) => {
                 if (err) {
                     const response = h.response({
                         status: "Failed",
-                        message: "Account Gagal Didaft arkan"
+                        message: "Account Gagal Didaftarkan"
                     })
                     response.code(400);
                     return response
@@ -916,6 +912,7 @@ const AddAccount = async (request, h) => {
                     city: null,
                     road: null,
                     postalCode: null,
+                    Bio: null
                 }
                 console.log(AccountData)
                 const checked = account.filter((item) => id === item.id)
@@ -928,7 +925,7 @@ const AddAccount = async (request, h) => {
             })
         })
 
-        console.log("udah nambah data")
+
         const response = h.response({
             status: "success",
             message: "Account Berhasil Di Daftarkan"
@@ -961,20 +958,23 @@ const GetCart = async (request, h) => {
         if (checkCart !== -1) {
             CartData.splice(checkCart, 1);
         }
-        CustomerCart = await select_data_user('cartproduct', username, 'user');
+        CustomerCart = await select_data_user('cartproduct', data[0].id, 'userID');
         CartData.push({
             username: username,
             data: CustomerCart
         })
 
         const SellerProduct = await select_data_user('CheckoutData', data[0].id, 'SellerID');
-        console.log(SellerProduct)
+
+        //checkPesan account
+        const isThereMessage = await CheckMessage(username);
 
         const response = h.response({
             status: 'Success',
             message: 'Sucess to Get Cart Data',
             data: CustomerCart,
-            SumProcessProduct: SellerProduct.length
+            SumProcessProduct: SellerProduct.length,
+            notifMessage: isThereMessage
         })
 
         response.code(200)
@@ -1021,18 +1021,21 @@ const select_data_user = async (tableName, value, column) => {
 
 const addToCart = async (request, h) => {
     const { username } = request.auth.credentials;
-    const { id, index, pcs, Seller, SellerID } = request.payload;
+    const { id, index, pcs, SellerID } = request.payload;
 
     let { data, error } = await supabase
         .from('Productku')
         .select('*')
     console.log(data)
 
+
+    const accountID = await select_data_user('Account', username, 'username')
+
     const Index_product = data.findIndex((item) => item.id === id);
     if (Index_product !== -1) {
         const product = data[Index_product];
         console.log(product)
-        if (pcs < 1) {
+        if (pcs < 1 && product[index].stock <= 0) {
             const response = h.response({
                 status: "Failed",
                 message: "PCS KURANG DARI 0",
@@ -1050,9 +1053,10 @@ const addToCart = async (request, h) => {
             origin: product.origin,
             weight: product.weight,
             totalweight: product.weight * pcs,
-            user: username,
-            Seller: Seller,
-            SellerID: SellerID
+            userID: accountID[0].id,
+            SellerID: SellerID,
+            Seller: product.Seller
+
         }
         await Insert_Supabase('cartproduct', data_baru)
         const response = h.response({
@@ -1113,9 +1117,12 @@ let CartToPay = []
 
 const GetCartBasedOnSeller = async (request, h) => {
     const { username } = request.auth.credentials;
+
+    const account = await select_data_user('Account', username, 'username')
     let Index = null
 
     CartBasedOnCust = []
+    console.log(CartData)
     const getCart = CartData.findIndex((item) => item.username === username)
     CartBasedOnCustomer = CartData[getCart].data
     console.log("pertama")
@@ -1130,11 +1137,12 @@ const GetCartBasedOnSeller = async (request, h) => {
                 }
             })
         }
-        if (point === 0 && item.user === username) {
+        if (point === 0 && account[0].id === item.userID) {
             const data = {
                 id: item.idCart,
                 Seller: item.Seller,
                 username: item.user,
+                idUser: item.userID,
                 cartProduk: [{
                     id: item.idCart,
                     indexCategory: item.indexCategory,
@@ -1171,7 +1179,7 @@ const GetCartBasedOnSeller = async (request, h) => {
     let TotalItem = 0;
     let TotalPrice = 0
     CartToPay.map((item) => {
-        if (item.user === username) {
+        if (item.userID === account[0].id) {
             dataCartToPay.push(item.idCart)
             TotalItem += item.pcs
             TotalPrice += item.totalPrice
@@ -1179,7 +1187,10 @@ const GetCartBasedOnSeller = async (request, h) => {
         }
     })
 
+
+
     if (dataCartToPay.length !== 0) {
+        console.log("Masuk kesinii")
         const response = h.response({
             status: 'Success',
             message: 'Data Berhasil Didapatkan',
@@ -1195,13 +1206,11 @@ const GetCartBasedOnSeller = async (request, h) => {
 
     }
     //=======================================================
-    console.log("bagian akhir")
-    console.log(CartToPay)
+    //Respon Ini Terjadi Apabila tidak ada data CartTopPay(process Checkout yang belum Selesai)
     const response = h.response({
         status: 'Success',
-        message: 'Data Berhasil Didapatkan',
         data: JSON.stringify(CartBasedOnCust),
-        lengthCart: CartData.length
+        message: 'Data Berhasil Didapatkan',
     })
     response.code(200)
     return response
@@ -1271,13 +1280,15 @@ const EditPcsCart = async (request, h) => {
 }
 
 
-const AddToPayCart = (request, h) => {
+const AddToPayCart = async (request, h) => {
     const { username } = request.auth.credentials;
     const { idCart, e } = request.payload;
+    const account = await select_data_user('Account', username, 'username')
     let TotalPrice = 0;
     let TotalItem = 0;
 
     const get_Cart = CartData.findIndex((item) => item.username === username)
+    console.log(get_Cart)
     if (get_Cart !== -1) {
         const dataCart = CartData[get_Cart].data
         if (e) {
@@ -1290,15 +1301,10 @@ const AddToPayCart = (request, h) => {
             CartToPay.splice(index, 1)
         }
 
-        console.log("sempat masuk")
-        console.log(CartToPay)
-
-        const id_transaction_array = []
         CartToPay.map((item) => {
-            if (item.user === username) {
+            if (item.userID === account[0].id) {
                 TotalPrice += item.totalPrice
                 TotalItem += item.pcs
-                id_transaction_array.push(item.id)
             }
         })
         const response = h.response({
@@ -1485,47 +1491,48 @@ const CheckedToken = async (request, h) => {
     return response
 }
 
+//fungsi ini untuk check apakah ada pesan yang belum di baca atau belum.
+// hasil akan digunakan untuk Notifikasi Pesan Pada Head Menu
+const CheckMessage = async (id) => {
+    let { data, error } = await supabase
+        .from('ChatData')
+        .select("*")
+        .eq('ReceiveAccountID', id)
+
+    data = data.filter((item) => item.isRead === 'false')
+    return data.length !== 0 ? true : false
+}
+
+
 const CheckAccount = async (request, h) => {
     const { username } = request.auth.credentials;
+    console.log(username)
 
     const data = await select_data_user('Account', username, 'username')
-    console.log(data)
-    const account = data
-    const checkedId = account.findIndex((item) => item.username === username)
-    if (checkedId !== -1) {
-        const id = account[checkedId].id
-        console.log(id)
-
-        const data = await select_data_user('AccountToken', id, 'idAccount');
-        const AccountToken = data
-
-        if (AccountToken.length === 1) {
-            const response = h.response({
-                status: "verified",
-                verified: true
-            })
-            response.code(200)
-            return response
-        }
-
-        //karena tidak di verifikasi maka alamat pada akun akan hilang
-        const state = null
-        const city = null
-        const road = null
-        const postalCode = null
-        await UpdateData('Account', 'id', data.id, [{ state: state }, { city: city }, { road: road }, { postalCode: postalCode }])
+    const isThereMessage = await CheckMessage(data[0].id);
+    const dataToken = await select_data_user('AccountToken', data[0].id, 'idAccount');
+    if (dataToken.length === 1) {
         const response = h.response({
-            status: "not Verified",
-            verified: false
+            status: "verified",
+            notifMessage: isThereMessage,
+            verified: true
         })
-        response.code(400)
+        response.code(200)
         return response
     }
+
+    //karena tidak di verifikasi maka alamat pada akun akan hilang
+    const state = null
+    const city = null
+    const road = null
+    const postalCode = null
+    await UpdateData('Account', 'id', data.id, [{ state: state }, { city: city }, { road: road }, { postalCode: postalCode }])
     const response = h.response({
-        status: "not Found",
+        status: "not Verified",
+        notifMessage: isThereMessage,
+        verified: false
     })
-    response.code(404)
-    return response
+   
 }
 
 const GetMyAccount = async (request, h) => {
@@ -1556,12 +1563,16 @@ const GetMyAccount = async (request, h) => {
 const GetRoomChat = async (request, h) => {
     const { username } = request.auth.credentials
 
+    const account = await select_data_user('Account', username, 'username')
     const { data, error } = await supabase
         .from('CategoryChat')
-        .select('*')
-        .or(`and(usernameSend.eq.${username},isDeletedOnAccount1.eq.${false}),and(userReceive.eq.${username},isDeletedOnAccount2.eq.${false})`)
+        .select('idCategory,LastContent,ReceivePictPathName,\
+            SenderPictPathName,CreatedAt,userReceive:Account!ReceiveAccountID(username),\
+            usernameSend:Account!SenderAccountID(username)')
+        .or(`and(SenderAccountID.eq.${account[0].id},isDeletedOnAccount1.eq.${false}),\
+            and(ReceiveAccountID.eq.${account[0].id},isDeletedOnAccount2.eq.${false})`)
 
-
+    console.log(data)
     let ListChatBasedOnRoom = {}
     let dataCategoryChat = []
     if (data) {
@@ -1571,20 +1582,23 @@ const GetRoomChat = async (request, h) => {
                 const get_data = async () => {
                     let { data, error } = await supabase
                         .from('ChatData')
-                        .select("*")
+                        .select("idChat,Content,isRead,isDeletedOnAccount1,\
+                            isDeletedOnAccount2,CreatedAt,Sender:Account!SenderAccountID(username),\
+                            Receive:Account!ReceiveAccountID(username)")
                         .eq('idCategoryChat', item.idCategory)
                         .order('id', { ascending: true }); // Use { ascending: false } for descending order
                     return data
                 }
 
                 const ListChat = await get_data();
+                console.log(ListChat)
 
                 const nUnRead = ListChat.filter((item) =>
-                    (item.Receive === username && item.isRead === 'false'))
+                    (item.Receive.username === username && item.isRead === 'false'))
 
                 console.log(item.idCategory)
                 ListChatBasedOnRoom[item.idCategory] = {
-                    data: ListChat.filter((item) => (item.Sender === username && item.isDeletedOnAccount1 === false) || (item.Receive === username && item.isDeletedOnAccount2 === false)),
+                    data: ListChat.filter((item) => (item.Sender.username === username && item.isDeletedOnAccount1 === false) || (item.Receive.username === username && item.isDeletedOnAccount2 === false)),
                 }
 
                 item = { ...item, nUnRead: nUnRead.length }
@@ -1647,15 +1661,13 @@ const Chatting = async (request, h) => {
             .from('CategoryChat')
             .select('*')
             .or(`and(usernameSend.eq.${username},userReceive.eq.${to}),and(usernameSend.eq.${to},userReceive.eq.${username})`)
-            .order('timestamp', { ascending: false });
+            .order('timestamp', { ascending: true });
 
         console.log(data)
         if (!idCategoryRoomChat && data.length === 0) {
             await Insert_Supabase('CategoryChat', {
                 idCategory: IdCategoryChat,
                 StatusChat: 'Private',
-                usernameSend: username,
-                userReceive: to,
                 LastContent: Text,
                 isAllRead: false,
                 CreatedAt: createdAt,
@@ -1663,6 +1675,8 @@ const Chatting = async (request, h) => {
                 SenderPictPathName: Sender[0].image,
                 isDeletedOnAccount1: false,
                 isDeletedOnAccount2: false,
+                SenderAccountID: Sender[0].id,
+                ReceiveAccountID: imageReceive[0].id,
                 timestamp: timeStamp,
             })
         } else {
@@ -1672,13 +1686,13 @@ const Chatting = async (request, h) => {
                     { ReceivePictPathName: imageReceive[0].image },
                     { SenderPictPathName: Sender[0].image },
                     { isAllRead: false },
-                    { usernameSend: username },
-                    { userReceive: to },
                     { LastContent: Text },
                     { CreatedAt: createdAt },
                     { timestamp: timeStamp },
                     { isDeletedOnAccount1: false },
                     { isDeletedOnAccount2: false },
+                    { SenderAccountID: Sender[0].id },
+                    { ReceiveAccountID: imageReceive[0].id },
                 ])
         }
         //lalu tambahkan kedalam data chat
@@ -1687,11 +1701,11 @@ const Chatting = async (request, h) => {
             idChat: nanoid(5),
             isRead: false,
             Content: Text,
-            Sender: username,
             CreatedAt: createdAt,
-            Receive: to,
             isDeletedOnAccount1: false,
             isDeletedOnAccount2: false,
+            SenderAccountID: Sender[0].id,
+            ReceiveAccountID: imageReceive[0].id,
             id: timeStamp,
         })
 
@@ -1700,6 +1714,7 @@ const Chatting = async (request, h) => {
                 console.log("mengirim ke", key)
                 io.to(value.id).emit("ReloadMessage", data.length !== 0 ? data[0].idCategory : IdCategoryChat)
             }
+            console.log(value, to)
         }
         console.log(storeConnections)
         const response = h.response({
@@ -1751,6 +1766,161 @@ const DeleteChat = async (request, h) => {
     })
     response.code(400)
     return response
+}
+
+
+//===========================SETTING HANDLING=======================/
+
+const TokenSetting = []; //menampung Nilai Token setting
+const CheckPass = async (request, h) => {
+    const { username } = request.auth.credentials;
+    const { pass } = request.payload;
+
+    const account = await select_data_user('Account', username, 'username')
+    console.log(pass)
+    const result = await bcrypt.compare(pass, account[0].kata_sandi);
+    if (result) {
+        const token = nanoid(20)
+
+        const MyToken = {
+            user: username,
+            token: token
+        }
+        TokenSetting.push(MyToken)//menambahkan ke Array TokenSetting
+
+        const response = h.response({
+            Status: 'Success',
+            PassCorrect: true,
+            TokenSetting: token
+        })
+        response.code(200)
+        console.log("token berhasil di dapatkan")
+        return response
+    }
+    console.log("token gagal didapatkan")
+
+    const response = h.response({
+        Status: 'Failed',
+        Message: 'Kata Sandi Salah',
+        PassCorrect: false,
+    })
+    response.code(401)
+    return response
+
+}
+
+
+const ChangeName = async (request, h) => {
+    const { username } = request.auth.credentials;
+    const { token, data } = request.payload;
+
+    const checkedIndex = TokenSetting.findIndex((item) => item.token === token && item.user === username)
+    if (checkedIndex !== -1) {
+        await UpdateData('Account', 'username', username, [{ nama: data }]);
+        const response = h.response({
+            Status: "Success",
+            Message: "Nama Berhasil Dirubah"
+        })
+        response.code(200)
+        TokenSetting.splice(checkedIndex, 1)
+        return response
+    }
+}
+
+const ChangePass = async (request, h) => {
+    const { username } = request.auth.credentials;
+    const { oldPassword, newPassword, newPassword2 } = request.payload;
+
+    console.log(oldPassword)
+    const account = await select_data_user('Account', username, 'username')
+    if (newPassword === newPassword2) {
+        const result = await bcrypt.compare(oldPassword, account[0].kata_sandi);
+        if (result) {
+            bcrypt.genSalt(10, (err, salt) => {
+                bcrypt.hash(newPassword, salt, async (err, hash) => {
+                    if (err) {
+                        const response = h.response({
+                            Status: 'Error',
+                            Message: 'Failed To Change Pass'
+                        })
+                        response.code(401)
+                        return response
+                    }
+                    await UpdateData('Account', 'username', username, [{ kata_sandi: hash }]);
+                })
+
+            })
+            const response = h.response({
+                Status: 'Success',
+                Message: 'Success To Change Pass'
+            })
+            response.code(200)
+            console.log("Kata Sandi Berhasil Dirubah")
+            return response
+        }
+    }
+    const response = h.response({
+        Status: 'Error',
+        Message: 'Failed To Change Pass'
+    })
+    response.code(401)
+    return response
+}
+
+const AddBio = async (request, h) => {
+    const { token, data } = request.payload;
+
+    const checkedIndex = TokenSetting.findIndex((item) => item.token === token && item.user === username)
+    if (checkedIndex !== -1) {
+        await UpdateData('Account', 'username', username, [{ Bio: data }]);
+        const response = h.response({
+            Status: "Success",
+            Message: "Bio Berhasil Ditambah"
+        })
+        response.code(200)
+        TokenSetting.splice(checkedIndex, 1)
+        return response
+    }
+}
+
+const ChangeUsername = async (request, h) => {
+    const { username } = request.auth.credentials
+    const { token, data } = request.payload;
+
+    const checkedIndex = TokenSetting.findIndex((item) => item.token === token)
+    if (checkedIndex !== -1) {
+        const check = await select_data_user('Account', data, 'username')
+        if (check.length > 0 || data.includes(" ")) {
+            const response = h.response({
+                Status: "Failed",
+                Message: "Username Sudah Ada"
+            })
+            response.code(500);
+            return response
+        }
+
+        await UpdateData('Account', 'username', username, [{ username: data }]);
+
+
+
+
+        const response = h.response({
+            Status: "Success",
+            Message: "Username Berhasil Dirubah",
+        })
+        response.code(200)
+        TokenSetting.splice(checkedIndex, 1)
+        return response
+    }
+
+    const response = h.response({
+        Status: "Failed",
+        Message: "Username Tidak Dikenal"
+    })
+    response.code(500);
+    return response
+
+
 
 }
 
@@ -1761,5 +1931,6 @@ module.exports = {
     EditPcsCart, AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
     FinishCheckout, GetProcessOrder, VerifyAccount, CheckedToken, CheckAccount, GetMyAccount,
     UploadImage, deletePicture, ChangeImageProfile, Get_Acces, ActionToDeleteCheckout,
-    YourProductOrder, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat
+    YourProductOrder, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, CheckPass,
+    ChangeName, ChangePass, AddBio, ChangeUsername
 }

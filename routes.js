@@ -7,7 +7,8 @@ const { GetData, GetProdukBySeller, AddProduct, EditProduct,
     EditPcsCart, AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
     FinishCheckout, GetProcessOrder, VerifyAccount, CheckedToken, CheckAccount, GetMyAccount,
     UploadImage,deletePicture,ChangeImageProfile,Get_Acces,ActionToDeleteCheckout,
-    YourProductOrder,SettingStatus,Chatting,GetRoomChat,CheckToRead,DeleteChat } = require('./handling')
+    YourProductOrder,SettingStatus,Chatting,GetRoomChat,CheckToRead,DeleteChat,CheckPass,
+    ChangeName,ChangePass,AddBio,ChangeUsername } = require('./handling')
 
 
 
@@ -21,6 +22,36 @@ const routes = [
                 'Message' : 'API IS RUNNING'
             }
         }
+    },
+    {
+        method: "POST",
+        path: "/ChangeUsername",
+        options: { auth: 'jwt-access' },
+        handler: ChangeUsername
+    },
+    {
+        method: "POST",
+        path: "/ChangePass",
+        options: { auth: 'jwt-access' },
+        handler: ChangePass
+    },
+    {
+        method: "POST",
+        path: "/AddBio",
+        options: { auth: 'jwt-access' },
+        handler: AddBio
+    },
+    {
+        method: "POST",
+        path: "/ChangeName",
+        options: { auth: 'jwt-access' },
+        handler: ChangeName
+    },
+    {
+        method: "POST",
+        path: "/CheckPass",
+        options: { auth: 'jwt-access' },
+        handler: CheckPass
     },
     {
         method: "DELETE",

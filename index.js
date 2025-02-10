@@ -52,14 +52,27 @@ const init = async () => {
     io.on("connection", (socket) => {
         console.log("terhubung", socket.id)
        
+
         socket.on('Register', (username) => {
-            storeConnections[username] = {
-                'user': username,
-                'id': socket.id,
-                'status': "main"
-            };
+            if(storeConnections[username]){
+                storeConnections[username+nanoid(5)] = {
+                    'user': username,
+                    'id': socket.id,
+                    'status': "main"
+                };
+                console.log("pendaftar pertama")
+            }else{
+                storeConnections[username] = {
+                    'user': username,
+                    'id': socket.id,
+                    'status': "main"
+                };
+                console.log("pendaftar kedua")
+            }
+            
             console.log('Toko terdaftar:', username);
             console.log(storeConnections)
+            
         })
        
         socket.on("RegistRoomChat", (username) => {
@@ -70,13 +83,19 @@ const init = async () => {
             };
             console.log(storeConnections)
         })
+        
 
 
         socket.on('Reset', (username) => {
-            if (storeConnections[username] === socket.id) {
-                console.log(storeConnections[username], "Keluar")
-                delete storeConnections[username]
+            console.log(username)
+            console.log(socket.id)
+            for ([key, values] of Object.entries(storeConnections)) {
+                if(values.user===username && values.id === socket.id){
+                    delete storeConnections[key]
+                    console.log(values.user,"terhapus")
+                }
             }
+            console.log(storeConnections)
         })
 
         socket.on('SendId', (id) => {
@@ -102,7 +121,6 @@ const init = async () => {
             }
         })
 
-
         //ketika device lain meminta akses dan user mengizinkan, maka akan dikirimkan informasi account
         //meliputi token refresh & acces juga untuk bisa melakukan pengambilan data
         socket.on('Send', (receive) => {
@@ -110,13 +128,8 @@ const init = async () => {
             for ([key, values] of Object.entries(permissonId)) {
                 console.log(key)
                 if (key.includes(username) && !values.status) {
-                    receive.data = { ...receive.data, idSocket: values.id }
+                    receive.data = { ...receive.data, idSocket: key,isRegist:false }
                     io.to(values.id).emit('Receive', receive.data)
-                    storeConnections[key] = {
-                        user: receive.data['username'],
-                        id: values.id,
-                        status: 'main'
-                    }
                     console.log("data", storeConnections[key], "ia Adalah", key, "Berhasil Di Rubah")
                 }
             }
