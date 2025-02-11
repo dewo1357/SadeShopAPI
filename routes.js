@@ -272,7 +272,7 @@ const routes = [
     },
     {
         method: 'DELETE',
-        path: '/hapusKeranjang/{id}',
+        path: '/hapusKeranjang/{idProduct}',
         options: { auth: 'jwt-access' },
         handler: hapusKeranjang
 

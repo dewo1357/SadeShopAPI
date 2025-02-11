@@ -82,13 +82,12 @@ const CheckedCheckout =  () => {
 
 let CheckOutArray = [];
 const CheckOut = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { Name, courier, province,
         city, kecamatan, kodepos } = request.payload;
 
-    const account = await select_data_user('Account', username, 'username')
 
-    const CartToPayBasedOnUser = CartToPay.filter((item) => item.userID === account[0].id)
+    const CartToPayBasedOnUser = CartToPay.filter((item) => item.userID === id)
 
     await Promise.all(
         CartToPayBasedOnUser.map(async (item) => {
@@ -123,7 +122,6 @@ const CheckOut = async (request, h) => {
                     let data = {
                         transaction_id: resi.toString(),
                         origin: item.origin,
-                        user: username,
                         userID: item.userID,
                         Customer: Name,
                         courier: courier,
@@ -152,7 +150,6 @@ const CheckOut = async (request, h) => {
                 let data = {
                     transaction_id: resi.toString(),
                     origin: item.origin,
-                    user: username,
                     userID: item.userID,
                     Customer: Name,
                     courier: courier,
@@ -207,10 +204,10 @@ const ShippingSetter = (request, h) => {
 
 
 const ActionToDeleteCheckout = (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     console.log("HAPUS CHECKOUTTT")
-    const checkoutDataBaru = CheckOutArray.filter((item) => item.user !== username)
-    const CartToPayBaru = CartToPay.filter((item) => item.user !== username)
+    const checkoutDataBaru = CheckOutArray.filter((item) => item.user !== id)
+    const CartToPayBaru = CartToPay.filter((item) => item.userID !== id)
     CheckOutArray = checkoutDataBaru
     CartToPay = CartToPayBaru
     const response = h.response({
@@ -223,10 +220,9 @@ const ActionToDeleteCheckout = (request, h) => {
 }
 
 const GetOverallCheckout = (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     console.log("USERNAMEEEEE")
-    console.log(username)
-    console.log(CheckOutArray)
+
 
     const dataCheckOut = []
     let ShippingcCost = 0;
@@ -234,7 +230,7 @@ const GetOverallCheckout = (request, h) => {
     let name = null;
     CheckOutArray.map((item) => {
         let TotalPay = 0;
-        if (item.user === username) {
+        if (item.userID === id) {
             item.product.map((item) => {
                 TotalPay += item.totalPrice
             })
@@ -363,11 +359,10 @@ const getDataProcess = async (category, valueReference, ColumnReference) => {
 }
 
 const GetProcessOrder = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { category } = request.params;
 
-    const accountdata = await select_data_user('Account', username, "username")
-    const getData = await getDataProcess(category, accountdata[0].id, 'BuyerAccountID')
+    const getData = await getDataProcess(category, id, 'BuyerAccountID')
 
     if (getData.length != 0) {
         const response = h.response({
@@ -387,11 +382,11 @@ const GetProcessOrder = async (request, h) => {
 }
 
 const YourProductOrder = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { category } = request.params;
 
-    const accountdata = await select_data_user('Account', username, "username")
-    const getData = await getDataProcess(category, accountdata[0].id, 'SellerID')
+
+    const getData = await getDataProcess(category, id, 'SellerID')
 
     if (getData != 0) {
         const response = h.response({
@@ -411,7 +406,7 @@ const YourProductOrder = async (request, h) => {
 }
 
 const SettingStatus = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { id_product_transaction, setValue } = request.payload;
     const data = await select_data_user('CheckoutProductDetail', id_product_transaction, 'id_transaction_product')
 
@@ -445,7 +440,7 @@ const SettingStatus = async (request, h) => {
 }
 
 const GetData = async (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     const io = request.server.app.io;
     const storeConnections = request.server.app.storeConnections;
 
@@ -453,19 +448,15 @@ const GetData = async (request, h) => {
     console.log("Get Product Data " + new Date().toISOString())
     let { data, error } = await supabase
         .from('Productku')
-        .select('*')
+        .select('*,name:Account!SellerID(nama)')
 
-    const targetSocket = storeConnections[username]; // Pastikan username adalah socket ID atau hubungkan dengan logic mapping
+    const targetSocket = storeConnections[id]; // Pastikan username adalah socket ID atau hubungkan dengan logic mapping
     if (targetSocket) {
         io.to(targetSocket).emit("Message", "SELAMAT DATANG")
         console.log("pesan terkirim kepada", targetSocket)
     }
 
-    /*
-    if (storeConnections[username]) {
-        storeConnections[username].emit("Message", "Selamat Datang ")
-    }
-        */
+
     const response = h.response({
         status: "success",
         messages: "Data Berhasil Di Dapatkan",
@@ -477,10 +468,9 @@ const GetData = async (request, h) => {
 }
 
 const GetProdukBySeller = async (request, h) => {
-    const { username } = request.auth.credentials;
-    const account = await select_data_user('Account', username, 'username')
+    const { id } = request.auth.credentials;
 
-    let dataFilter = await select_data_user('Productku', account[0].id, 'SellerID')
+    let dataFilter = await select_data_user('Productku', id, 'SellerID')
     const response = h.response({
         status: "success",
         message: "Data Success Didapat",
@@ -538,29 +528,29 @@ const deletePictureBucket = async (filename, bucket) => {
 }
 
 const ChangeImageProfile = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { files } = request.payload
 
-    const get_Account = await select_data_user('Account', username, 'username');
+    const get_Account = await select_data_user('Account', id, 'id');
     if (get_Account !== -1) {
         if (get_Account[0].image !== 'user.png') {
             await supabase.storage.from('ProfilePicture').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/ProfilePicture/`, get_Account[0].image])
         }
         await uploadImagestoSupabase(files, 'ProfilePicture')
-        await UpdateData('Account', 'username', username, [{ image: files.hapi.filename }])
+        await UpdateData('Account', 'id', id, [{ image: files.hapi.filename }])
 
         const { data, error } = await supabase
             .from('CategoryChat')
             .select('*')
-            .or(`usernameSend.eq.${username},userReceive.eq.${username}`)
+            .or(`SenderAccountID.eq.${id},ReceiveAccountID.eq.${id}`)
             .order('timestamp', { ascending: false });
 
         Promise.all(
             data.map(async (item) => {
-                if (item.usernameSend === username) {
-                    await UpdateData('CategoryChat', 'usernameSend', username, [{ SenderPictPathName: files.hapi.filename }])
+                if (item.SenderAccountID === id) {
+                    await UpdateData('CategoryChat', 'SenderAccountID', id, [{ SenderPictPathName: files.hapi.filename }])
                 } else {
-                    await UpdateData('CategoryChat', 'userReceive', username, [{ ReceivePictPathName: files.hapi.filename }])
+                    await UpdateData('CategoryChat', 'ReceiveAccountID', id, [{ ReceivePictPathName: files.hapi.filename }])
                 }
             })
         )
@@ -583,7 +573,7 @@ const ChangeImageProfile = async (request, h) => {
 }
 
 const UploadImage = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { files } = request.payload
     const upload = await uploadImagestoSupabase(files, 'gambarProducts')
     if (upload) {
@@ -604,31 +594,28 @@ const UploadImage = async (request, h) => {
 }
 
 const deletePicture = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { filename } = request.params;
 
     await deletePictureBucket(filename, 'gambarProducts');
 }
 
 const AddProduct = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { images, title, kind, price, stok, content, weight } = request.payload;
-    let { data, error } = await supabase
-        .from('Account')
-        .select('*')
-    const checkedAccount = data.findIndex((item) => item.username === username);
-    if (checkedAccount !== -1) {
-        const Seller = data[checkedAccount].nama
-        const SellerID = data[checkedAccount].id
+    const data = await select_data_user('Account', id, 'id')
 
-        const AccountToken = await select_data_user('AccountToken', data[checkedAccount].id, 'idAccount')
+    if (data.length === -1) {
+        const Seller = data[0].nama
+        const SellerID = data[0].id
+
+        const AccountToken = await select_data_user('AccountToken', id, 'idAccount')
         if (AccountToken.length === 1) {
             const id = nanoid();
             const Time = new Date().toISOString();
 
             const data_baru = {
                 id: id,
-                Seller: Seller,
                 SellerID: SellerID,
                 URLimages: images,
                 title: title,
@@ -637,10 +624,10 @@ const AddProduct = async (request, h) => {
                 stok: stok,
                 content: content,
                 UpdateAt: Time,
-                state: data[checkedAccount].state,
-                city: data[checkedAccount].city,
-                road: data[checkedAccount].road,
-                origin: data[checkedAccount].postalCode,
+                state: data[0].state,
+                city: data[0].city,
+                road: data[0].road,
+                origin: data[0].postalCode,
                 weight: weight
             }
             await Insert_Supabase('Productku', data_baru)
@@ -668,7 +655,7 @@ const AddProduct = async (request, h) => {
 
 
 const EditProduct = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { idProduct } = request.params;
     const { images, title, kind, price, stok, content } = request.payload;
 
@@ -696,10 +683,10 @@ const EditProduct = async (request, h) => {
 }
 
 const DeleteProduct = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { idProduct } = request.params;
 
-    if (username) {
+    if (id) {
         const { error } = await supabase
             .from('Productku')
             .delete()
@@ -725,10 +712,10 @@ const DeleteProduct = async (request, h) => {
 
 
 const GetAccountByUsername = async (request, h) => {
-    const { username } = request.params
+    const { id } = request.params
 
-    const data = await select_data_user('Account', username, 'id')
-    const product = await select_data_user('Productku', data[0].id, 'SellerID')
+    const data = await select_data_user('Account', id, 'id')
+    const product = await select_data_user('Productku', id, 'SellerID')
 
     if (data && product) {
         const response = h.response({
@@ -770,21 +757,23 @@ const SECRET_REFRESH_TOKEN = 'refresh_secret_key';
 
 const Get_Acces = async (request, h) => {
     const { refreshToken } = request.payload;
+    console.log("get Access",refreshToken)
 
     const checkToken = await select_data_user('RefreshToken', refreshToken, 'refreshToken')
     if (checkToken.length !== 0) {
         console.log(checkToken)
         const account = await select_data_user('Account', checkToken[0].idAccount, 'id')
-        const username = account[0].username
+        const id = account[0].id
 
         const acces_token = jwt.sign(
-            { username }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
+            { id }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
         )
         console.log(acces_token)
         const response = h.response({
             status: "Success",
             message: "Token Berhasil Diperbarui",
-            acces_token: acces_token
+            acces_token: acces_token,
+            username : account[0].username
         })
         response.code(200)
         return response
@@ -826,7 +815,9 @@ const GetDataAccount = async (request, h) => {
 
         if (result) {
             const acces_token = jwt.sign(
-                { username }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
+                {
+                    'id': data[0].id
+                }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
             )
 
             const refresh_token = jwt.sign(
@@ -944,30 +935,30 @@ const AddAccount = async (request, h) => {
 
 
 const CartData = [{
-    username: '',
+    id: '',
     data: []
 }];
 
 const GetCart = async (request, h) => {
-    const { username } = request.auth.credentials;
-    const data = await select_data_user('Account', username, 'username')
+    const { id } = request.auth.credentials;
+    console.log(id)
+    const data = await select_data_user('Account', id, 'id')
     console.log("Mengambil Data Keranjang " + new Date().toISOString())
-    const Index = data.findIndex((item) => item.username === username)
-    if (Index !== -1) {
-        const checkCart = CartData.findIndex((item) => item.username === username);
+    if (data.length === 1) {
+        const checkCart = CartData.findIndex((item) => item.id === id);
         if (checkCart !== -1) {
             CartData.splice(checkCart, 1);
         }
         CustomerCart = await select_data_user('cartproduct', data[0].id, 'userID');
         CartData.push({
-            username: username,
+            id: id,
             data: CustomerCart
         })
 
         const SellerProduct = await select_data_user('CheckoutData', data[0].id, 'SellerID');
 
         //checkPesan account
-        const isThereMessage = await CheckMessage(username);
+        const isThereMessage = await CheckMessage(id);
 
         const response = h.response({
             status: 'Success',
@@ -1011,7 +1002,6 @@ const select_data_user = async (tableName, value, column) => {
         if (error) {
             console.log(error)
         }
-
         return data
     } catch (err) {
         console.log(err.message)
@@ -1020,8 +1010,13 @@ const select_data_user = async (tableName, value, column) => {
 
 
 const addToCart = async (request, h) => {
-    const { username } = request.auth.credentials;
-    const { id, index, pcs, SellerID } = request.payload;
+    const { id } = request.auth.credentials;
+
+    const { idProduct, index, pcs, SellerID } = request.payload;
+    console.log(idProduct)
+    console.log(index)
+    console.log(SellerID)
+
 
     let { data, error } = await supabase
         .from('Productku')
@@ -1029,9 +1024,9 @@ const addToCart = async (request, h) => {
     console.log(data)
 
 
-    const accountID = await select_data_user('Account', username, 'username')
 
-    const Index_product = data.findIndex((item) => item.id === id);
+
+    const Index_product = data.findIndex((item) => item.id === idProduct);
     if (Index_product !== -1) {
         const product = data[Index_product];
         console.log(product)
@@ -1044,7 +1039,7 @@ const addToCart = async (request, h) => {
         }
         const data_baru = {
             idCart: nanoid(20),
-            id: id.toString(),
+            id: idProduct.toString(),
             title: product.title,
             indexCategory: index,
             pcs: pcs,
@@ -1053,7 +1048,7 @@ const addToCart = async (request, h) => {
             origin: product.origin,
             weight: product.weight,
             totalweight: product.weight * pcs,
-            userID: accountID[0].id,
+            userID: id,
             SellerID: SellerID,
             Seller: product.Seller
 
@@ -1086,16 +1081,16 @@ const deleteData = async (tableName, ColumnReference, Value) => {
 }
 
 const hapusKeranjang = async (request, h) => {
-    const { username } = request.auth.credentials;
-    const { id } = request.params;
+    const { id } = request.auth.credentials;
+    const { idProduct } = request.params;
 
 
-    const IndexUsername = CartData.findIndex((item) => item.username === username);
+    const IndexUsername = CartData.findIndex((item) => item.id === id);
     if (IndexUsername !== -1) {
-        await deleteData('cartproduct', 'idCart', id);
+        await deleteData('cartproduct', 'idCart', idProduct);
         const get_Index_product = CartData[IndexUsername].data.findIndex((item) => item.idCart === id)
         console.log(CartData[IndexUsername].data)
-        console.log(id)
+        console.log(idProduct)
         CartData[IndexUsername].data.splice(get_Index_product, 1)
         const response = h.response({
             status: "Success",
@@ -1116,14 +1111,12 @@ let CartToPay = []
 
 
 const GetCartBasedOnSeller = async (request, h) => {
-    const { username } = request.auth.credentials;
-
-    const account = await select_data_user('Account', username, 'username')
+    const { id } = request.auth.credentials;
     let Index = null
 
     CartBasedOnCust = []
     console.log(CartData)
-    const getCart = CartData.findIndex((item) => item.username === username)
+    const getCart = CartData.findIndex((item) => item.id === id)
     CartBasedOnCustomer = CartData[getCart].data
     console.log("pertama")
     console.log(CartBasedOnCustomer)
@@ -1137,7 +1130,7 @@ const GetCartBasedOnSeller = async (request, h) => {
                 }
             })
         }
-        if (point === 0 && account[0].id === item.userID) {
+        if (point === 0 && id === item.userID) {
             const data = {
                 id: item.idCart,
                 Seller: item.Seller,
@@ -1179,7 +1172,7 @@ const GetCartBasedOnSeller = async (request, h) => {
     let TotalItem = 0;
     let TotalPrice = 0
     CartToPay.map((item) => {
-        if (item.userID === account[0].id) {
+        if (item.userID === id) {
             dataCartToPay.push(item.idCart)
             TotalItem += item.pcs
             TotalPrice += item.totalPrice
@@ -1237,16 +1230,14 @@ const UpdateData = async (tableName, columnReference, reference, updateValue) =>
 }
 
 const EditPcsCart = async (request, h) => {
-    const { username } = request.auth.credentials;
-    const { id, value } = request.payload;
+    const { id } = request.auth.credentials;
+    const { idProduct, value } = request.payload;
     if (value > -1) {
-        const index = CartData.findIndex((item) => username === item.username)
+        const index = CartData.findIndex((item) => id === item.id)
         //memperbarui CartData
         const data = CartData[index]
-        console.log("pertamaxxx")
-        console.log(data)
         //memperbarui berdasarkan
-        const indexDataCart = data.data.findIndex((item) => item.idCart === id)
+        const indexDataCart = data.data.findIndex((item) => item.idCart === idProduct)
         if (indexDataCart === -1) {
             return false
         }
@@ -1260,7 +1251,7 @@ const EditPcsCart = async (request, h) => {
 
         const sesiUpdate = [{ pcs: value }, { totalPrice: total }, { totalweight: bobot.toString() }]
         //memeperbarui di dalam database
-        await UpdateData('cartproduct', 'idCart', id, sesiUpdate)
+        await UpdateData('cartproduct', 'idCart', idProduct, sesiUpdate)
 
 
         const response = h.response({
@@ -1281,13 +1272,13 @@ const EditPcsCart = async (request, h) => {
 
 
 const AddToPayCart = async (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     const { idCart, e } = request.payload;
-    const account = await select_data_user('Account', username, 'username')
+
     let TotalPrice = 0;
     let TotalItem = 0;
 
-    const get_Cart = CartData.findIndex((item) => item.username === username)
+    const get_Cart = CartData.findIndex((item) => item.id === id)
     console.log(get_Cart)
     if (get_Cart !== -1) {
         const dataCart = CartData[get_Cart].data
@@ -1302,7 +1293,7 @@ const AddToPayCart = async (request, h) => {
         }
 
         CartToPay.map((item) => {
-            if (item.userID === account[0].id) {
+            if (item.userID === id) {
                 TotalPrice += item.totalPrice
                 TotalItem += item.pcs
             }
@@ -1505,12 +1496,9 @@ const CheckMessage = async (id) => {
 
 
 const CheckAccount = async (request, h) => {
-    const { username } = request.auth.credentials;
-    console.log(username)
-
-    const data = await select_data_user('Account', username, 'username')
-    const isThereMessage = await CheckMessage(data[0].id);
-    const dataToken = await select_data_user('AccountToken', data[0].id, 'idAccount');
+    const { id } = request.auth.credentials;
+    const isThereMessage = await CheckMessage(id);
+    const dataToken = await select_data_user('AccountToken', id, 'idAccount');
     if (dataToken.length === 1) {
         const response = h.response({
             status: "verified",
@@ -1526,27 +1514,24 @@ const CheckAccount = async (request, h) => {
     const city = null
     const road = null
     const postalCode = null
-    await UpdateData('Account', 'id', data.id, [{ state: state }, { city: city }, { road: road }, { postalCode: postalCode }])
+    await UpdateData('Account', 'id', id, [{ state: state }, { city: city }, { road: road }, { postalCode: postalCode }])
     const response = h.response({
         status: "not Verified",
         notifMessage: isThereMessage,
         verified: false
     })
-   
+    return response
+
 }
 
 const GetMyAccount = async (request, h) => {
-    const { username } = request.auth.credentials
-    let { data, error } = await supabase
-        .from('Account')
-        .select('*')
-    const checkedAccount = data.findIndex((item) => item.username === username)
-    if (checkedAccount !== -1) {
-        const MyAccount = data[checkedAccount];
+    const { id } = request.auth.credentials
+    const checkedAccount = await select_data_user('Account', id, 'id')
+    if (checkedAccount.length === 1) {
         const response = h.response({
             status: "Success",
             message: "Success To Get Account",
-            dataAccount: MyAccount
+            dataAccount: checkedAccount[0]
         })
         response.code(200)
         return response
@@ -1561,16 +1546,17 @@ const GetMyAccount = async (request, h) => {
 
 
 const GetRoomChat = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
 
-    const account = await select_data_user('Account', username, 'username')
     const { data, error } = await supabase
         .from('CategoryChat')
-        .select('idCategory,LastContent,ReceivePictPathName,\
-            SenderPictPathName,CreatedAt,userReceive:Account!ReceiveAccountID(username),\
-            usernameSend:Account!SenderAccountID(username)')
-        .or(`and(SenderAccountID.eq.${account[0].id},isDeletedOnAccount1.eq.${false}),\
-            and(ReceiveAccountID.eq.${account[0].id},isDeletedOnAccount2.eq.${false})`)
+        .select('idCategory,LastContent,CreatedAt,\
+            SenderAccountID,ReceiveAccountID,\
+            userReceive:Account!ReceiveAccountID(username),\
+            usernameSend:Account!SenderAccountID(username),\
+            PictSend:Account!SenderAccountID(image),PictReceive:Account!ReceiveAccountID(image)')
+        .or(`and(SenderAccountID.eq.${id},isDeletedOnAccount1.eq.${false}),\
+            and(ReceiveAccountID.eq.${id},isDeletedOnAccount2.eq.${false})`)
 
     console.log(data)
     let ListChatBasedOnRoom = {}
@@ -1583,8 +1569,8 @@ const GetRoomChat = async (request, h) => {
                     let { data, error } = await supabase
                         .from('ChatData')
                         .select("idChat,Content,isRead,isDeletedOnAccount1,\
-                            isDeletedOnAccount2,CreatedAt,Sender:Account!SenderAccountID(username),\
-                            Receive:Account!ReceiveAccountID(username)")
+                            isDeletedOnAccount2,CreatedAt,ReceiveAccountID,SenderAccountID,\
+                            Sender:Account!SenderAccountID(username),Receive:Account!ReceiveAccountID(username)")
                         .eq('idCategoryChat', item.idCategory)
                         .order('id', { ascending: true }); // Use { ascending: false } for descending order
                     return data
@@ -1594,11 +1580,11 @@ const GetRoomChat = async (request, h) => {
                 console.log(ListChat)
 
                 const nUnRead = ListChat.filter((item) =>
-                    (item.Receive.username === username && item.isRead === 'false'))
+                    (item.ReceiveAccountID === id && item.isRead === 'false'))
 
                 console.log(item.idCategory)
                 ListChatBasedOnRoom[item.idCategory] = {
-                    data: ListChat.filter((item) => (item.Sender.username === username && item.isDeletedOnAccount1 === false) || (item.Receive.username === username && item.isDeletedOnAccount2 === false)),
+                    data: ListChat.filter((item) => (item.SenderAccountID === id && item.isDeletedOnAccount1 === false) || (item.ReceiveAccountID === id && item.isDeletedOnAccount2 === false)),
                 }
 
                 item = { ...item, nUnRead: nUnRead.length }
@@ -1625,11 +1611,11 @@ const GetRoomChat = async (request, h) => {
 }
 
 const CheckToRead = async (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     const { IdCategoryChat } = request.params;
 
     const checkCategoryChat = await select_data_user('CategoryChat', IdCategoryChat, 'idCategory');
-    if (checkCategoryChat[0].userReceive === username) {
+    if (checkCategoryChat[0].ReceiveAccountID === id) {
         await UpdateData('CategoryChat', 'idCategory', IdCategoryChat, [{ isAllRead: true }])
         await UpdateData('ChatData', 'idCategoryChat', IdCategoryChat, [{ isRead: true }])
     }
@@ -1639,7 +1625,7 @@ const CheckToRead = async (request, h) => {
 
 
 const Chatting = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { Text, to, idCategoryRoomChat } = request.payload;
     const storeConnections = request.server.app.storeConnections
     const io = request.server.app.io
@@ -1651,50 +1637,43 @@ const Chatting = async (request, h) => {
     const timeStamp = Number(times.getTime());
     const createdAt = `${hours}.${minute}`
 
-    //mendapatkan image Account penerima Pesan
-    const imageReceive = await select_data_user('Account', to, 'username')
-    const Sender = await select_data_user('Account', username, 'username')
-    if (imageReceive.length === 1 && Sender.length === 1) {
-        //tambahkan ke data Category Chat Terlebih Dahulu 
-        //tapi harus di validasi apakah category sudah ada?jika ada maka tidak perlu
-        const { data, error } = await supabase
-            .from('CategoryChat')
-            .select('*')
-            .or(`and(usernameSend.eq.${username},userReceive.eq.${to}),and(usernameSend.eq.${to},userReceive.eq.${username})`)
-            .order('timestamp', { ascending: true });
 
-        console.log(data)
-        if (!idCategoryRoomChat && data.length === 0) {
-            await Insert_Supabase('CategoryChat', {
-                idCategory: IdCategoryChat,
-                StatusChat: 'Private',
-                LastContent: Text,
-                isAllRead: false,
-                CreatedAt: createdAt,
-                ReceivePictPathName: imageReceive[0].image,
-                SenderPictPathName: Sender[0].image,
-                isDeletedOnAccount1: false,
-                isDeletedOnAccount2: false,
-                SenderAccountID: Sender[0].id,
-                ReceiveAccountID: imageReceive[0].id,
-                timestamp: timeStamp,
-            })
-        } else {
+    //tambahkan ke data Category Chat Terlebih Dahulu 
+    //tapi harus di validasi apakah category sudah ada?jika ada maka tidak perlu
+    const { data, error } = await supabase
+        .from('CategoryChat')
+        .select('*')
+        .or(`and(SenderAccountID.eq.${id},ReceiveAccountID.eq.${to}),and(SenderAccountID.eq.${to},ReceiveAccountID.eq.${id})`)
+        .order('timestamp', { ascending: true });
 
-            await UpdateData('CategoryChat', 'idCategory', data ? data[0].idCategory : idCategoryRoomChat,
-                [
-                    { ReceivePictPathName: imageReceive[0].image },
-                    { SenderPictPathName: Sender[0].image },
-                    { isAllRead: false },
-                    { LastContent: Text },
-                    { CreatedAt: createdAt },
-                    { timestamp: timeStamp },
-                    { isDeletedOnAccount1: false },
-                    { isDeletedOnAccount2: false },
-                    { SenderAccountID: Sender[0].id },
-                    { ReceiveAccountID: imageReceive[0].id },
-                ])
-        }
+    console.log(data)
+    if (!idCategoryRoomChat && data.length === 0) {
+        await Insert_Supabase('CategoryChat', {
+            idCategory: IdCategoryChat,
+            StatusChat: 'Private',
+            LastContent: Text,
+            isAllRead: false,
+            CreatedAt: createdAt,
+            isDeletedOnAccount1: false,
+            isDeletedOnAccount2: false,
+            SenderAccountID: id,
+            ReceiveAccountID: to,
+            timestamp: timeStamp,
+        })
+    } else {
+
+        await UpdateData('CategoryChat', 'idCategory', data ? data[0].idCategory : idCategoryRoomChat,
+            [
+                { isAllRead: false },
+                { LastContent: Text },
+                { CreatedAt: createdAt },
+                { timestamp: timeStamp },
+                { isDeletedOnAccount1: false },
+                { isDeletedOnAccount2: false },
+                { SenderAccountID: id },
+                { ReceiveAccountID: to },
+            ])
+
         //lalu tambahkan kedalam data chat
         await Insert_Supabase('ChatData', {
             idCategoryChat: data.length !== 0 ? data[0].idCategory : IdCategoryChat,
@@ -1704,8 +1683,8 @@ const Chatting = async (request, h) => {
             CreatedAt: createdAt,
             isDeletedOnAccount1: false,
             isDeletedOnAccount2: false,
-            SenderAccountID: Sender[0].id,
-            ReceiveAccountID: imageReceive[0].id,
+            SenderAccountID: id,
+            ReceiveAccountID: to,
             id: timeStamp,
         })
 
@@ -1734,7 +1713,7 @@ const Chatting = async (request, h) => {
 }
 
 const DeleteChat = async (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     const { idChat } = request.params;
 
     console.log(idChat)
@@ -1743,7 +1722,7 @@ const DeleteChat = async (request, h) => {
     if (data.length === 1) {
         console.log(data)
         for ([key, value] of Object.entries(data[0])) {
-            if (value === username) {
+            if (value === id) {
                 if (key === 'Sender') {
                     await UpdateData('ChatData', 'idChat', idChat, [{ isDeletedOnAccount1: true }])
                 } else {
@@ -1773,17 +1752,17 @@ const DeleteChat = async (request, h) => {
 
 const TokenSetting = []; //menampung Nilai Token setting
 const CheckPass = async (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     const { pass } = request.payload;
 
-    const account = await select_data_user('Account', username, 'username')
+    const account = await select_data_user('Account', id, 'id')
     console.log(pass)
     const result = await bcrypt.compare(pass, account[0].kata_sandi);
     if (result) {
         const token = nanoid(20)
 
         const MyToken = {
-            user: username,
+            user: id,
             token: token
         }
         TokenSetting.push(MyToken)//menambahkan ke Array TokenSetting
@@ -1811,12 +1790,12 @@ const CheckPass = async (request, h) => {
 
 
 const ChangeName = async (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     const { token, data } = request.payload;
 
-    const checkedIndex = TokenSetting.findIndex((item) => item.token === token && item.user === username)
+    const checkedIndex = TokenSetting.findIndex((item) => item.token === token && item.user === id)
     if (checkedIndex !== -1) {
-        await UpdateData('Account', 'username', username, [{ nama: data }]);
+        await UpdateData('Account', 'id', id, [{ nama: data }]);
         const response = h.response({
             Status: "Success",
             Message: "Nama Berhasil Dirubah"
@@ -1828,11 +1807,11 @@ const ChangeName = async (request, h) => {
 }
 
 const ChangePass = async (request, h) => {
-    const { username } = request.auth.credentials;
+    const { id } = request.auth.credentials;
     const { oldPassword, newPassword, newPassword2 } = request.payload;
 
     console.log(oldPassword)
-    const account = await select_data_user('Account', username, 'username')
+    const account = await select_data_user('Account', id, 'id')
     if (newPassword === newPassword2) {
         const result = await bcrypt.compare(oldPassword, account[0].kata_sandi);
         if (result) {
@@ -1846,7 +1825,7 @@ const ChangePass = async (request, h) => {
                         response.code(401)
                         return response
                     }
-                    await UpdateData('Account', 'username', username, [{ kata_sandi: hash }]);
+                    await UpdateData('Account', 'id', id, [{ kata_sandi: hash }]);
                 })
 
             })
@@ -1868,11 +1847,12 @@ const ChangePass = async (request, h) => {
 }
 
 const AddBio = async (request, h) => {
+    const {id} = request.auth.credentials
     const { token, data } = request.payload;
 
-    const checkedIndex = TokenSetting.findIndex((item) => item.token === token && item.user === username)
+    const checkedIndex = TokenSetting.findIndex((item) => item.token === token && item.user === id)
     if (checkedIndex !== -1) {
-        await UpdateData('Account', 'username', username, [{ Bio: data }]);
+        await UpdateData('Account', 'id', id, [{ Bio: data }]);
         const response = h.response({
             Status: "Success",
             Message: "Bio Berhasil Ditambah"
@@ -1884,7 +1864,7 @@ const AddBio = async (request, h) => {
 }
 
 const ChangeUsername = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { token, data } = request.payload;
 
     const checkedIndex = TokenSetting.findIndex((item) => item.token === token)
@@ -1899,10 +1879,7 @@ const ChangeUsername = async (request, h) => {
             return response
         }
 
-        await UpdateData('Account', 'username', username, [{ username: data }]);
-
-
-
+        await UpdateData('Account', 'id', id, [{ username: data }]);
 
         const response = h.response({
             Status: "Success",
