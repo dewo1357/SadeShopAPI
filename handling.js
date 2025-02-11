@@ -602,20 +602,20 @@ const deletePicture = async (request, h) => {
 
 const AddProduct = async (request, h) => {
     const { id } = request.auth.credentials
-    const { images, title, kind, price, stok, content, weight } = request.payload;
+    const { idProduct, images, title, kind, price, stok, content, weight } = request.payload;
     const data = await select_data_user('Account', id, 'id')
 
-    if (data.length === -1) {
+    if (data.length === 1) {
+        
         const Seller = data[0].nama
         const SellerID = data[0].id
 
         const AccountToken = await select_data_user('AccountToken', id, 'idAccount')
         if (AccountToken.length === 1) {
-            const id = nanoid();
             const Time = new Date().toISOString();
 
             const data_baru = {
-                id: id,
+                id: idProduct,
                 SellerID: SellerID,
                 URLimages: images,
                 title: title,
