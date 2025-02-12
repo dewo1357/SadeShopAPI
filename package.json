@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "echo 'No build required'", 
+    "build": "echo 'No build required'",
     "vercel-build": "echo 'No build required'"
   },
   "author": "",
@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.2",
     "nanoid": "^3.3.8",
     "nodemailer": "^6.9.16",
+    "qs": "^6.14.0",
     "serverless-http": "^3.2.0",
     "socket.io": "^4.8.1"
   },

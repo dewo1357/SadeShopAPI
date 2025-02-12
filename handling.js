@@ -470,7 +470,13 @@ const GetData = async (request, h) => {
 const GetProdukBySeller = async (request, h) => {
     const { id } = request.auth.credentials;
 
-    let dataFilter = await select_data_user('Productku', id, 'SellerID')
+    let { data, error } = await supabase
+        .from('Productku')
+        .select('*,name:Account!SellerID(nama)')
+        .eq('SellerID', id)
+
+
+    let dataFilter = data
     const response = h.response({
         status: "success",
         message: "Data Success Didapat",
@@ -606,14 +612,14 @@ const AddProduct = async (request, h) => {
     const data = await select_data_user('Account', id, 'id')
 
     if (data.length === 1) {
-        
+
         const Seller = data[0].nama
         const SellerID = data[0].id
 
-        const AccountToken = await select_data_user('AccountToken', id, 'idAccount')
+        //check apakah user ini tervalidasi atau tidak. mengingat frontend mudah di manipulasi, perlu adanya validasi ulang
+        const AccountToken = await select_data_user('AccountToken', id, 'idAccount');
         if (AccountToken.length === 1) {
             const Time = new Date().toISOString();
-
             const data_baru = {
                 id: idProduct,
                 SellerID: SellerID,
@@ -660,7 +666,6 @@ const EditProduct = async (request, h) => {
     const { images, title, kind, price, stok, content } = request.payload;
 
     const Time = new Date().getDate();
-
     const sesiUpdate = [
         { price: price },
         { stok: stok },
@@ -671,6 +676,16 @@ const EditProduct = async (request, h) => {
         { UpdateAt: Time }
     ]
 
+    //cek apakah nama file yang masuk di variabel images sama dengan sebelumnya?
+    //jika sama, maka tidak perlu ada penghapusan gambar. tapi jika iya akan dihapus gambar yang lama
+    const dataProduct = await select_data_user('Productku', idProduct, 'id');
+    if (images !== dataProduct[0].URLimages) {
+        //Proses Menghapus
+        console.log("dihapus")
+        await supabase.storage.from('gambarProducts').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/gambarProducts/`, dataProduct[0].URLimages])
+    }
+
+    //eksekusi merubah data
     await UpdateData('Productku', 'id', idProduct, sesiUpdate)
     const response = h.response({
         status: "success",
@@ -757,7 +772,7 @@ const SECRET_REFRESH_TOKEN = 'refresh_secret_key';
 
 const Get_Acces = async (request, h) => {
     const { refreshToken } = request.payload;
-    console.log("get Access",refreshToken)
+    console.log("get Access", refreshToken)
 
     const checkToken = await select_data_user('RefreshToken', refreshToken, 'refreshToken')
     if (checkToken.length !== 0) {
@@ -773,7 +788,7 @@ const Get_Acces = async (request, h) => {
             status: "Success",
             message: "Token Berhasil Diperbarui",
             acces_token: acces_token,
-            username : account[0].username
+            username: account[0].username
         })
         response.code(200)
         return response
@@ -791,29 +806,27 @@ const GetDataAccount = async (request, h) => {
     const io = request.server.app.io
     const { username, kata_sandi } = request.payload;
 
-    for ([key, value] of Object.entries(storeConnections)) {
-        if (value.user === username) {
-            const response = h.response({
-                status: "Failed",
-                message: "Account Sedang digunakan di device lain",
-            })
-            response.code(500)
-            return response
-        }
-    }
 
     const data = await select_data_user('Account', username, 'username')
-
-    const index = data.findIndex((item) => item.username === username)
-
     console.log("Login Berhasil " + new Date().toISOString())
-
 
     if (data.length === 1) {
         const result = await bcrypt.compare(kata_sandi, data[0].kata_sandi);
         console.log(result)
 
         if (result) {
+            //checking apakah ada user sedang memakai account yang sama
+            for ([key, value] of Object.entries(storeConnections)) {
+                if (value.user === username) {
+                    const response = h.response({
+                        status: "Failed",
+                        message: "Account Sedang digunakan di device lain",
+                    })
+                    response.code(500)
+                    return response
+                }
+            }
+
             const acces_token = jwt.sign(
                 {
                     'id': data[0].id
@@ -1037,6 +1050,27 @@ const addToCart = async (request, h) => {
             })
             response.code(401)
         }
+        //sebelum mendaftarikan. di dahulukan check cart user dahulu, jika ada product yang sama, maka cukup tambahkan pcs nya saja
+        const CartUser = CartData[id]
+        if (CartUser) {
+            const data = CartData[id].data
+            console.log("ketemu")
+            console.log(data)
+            const checkProduct = data.findIndex((item) => item.id === idProduct.toISOString())
+            if (checkProduct !== -1) {
+                const getPcs = data[checkProduct].pcs
+                const getIdCart = data[checkProduct].idCart
+                await UpdateData('cartproduct', 'idCart', getIdCart, [{ pcs: getPcs + pcs }])
+                const response = h.response({
+                    status: 'Success',
+                    message: 'Add To Cart',
+                    data: data_baru,
+                })
+                console.log(Cart)
+                response.code(200)
+                return response
+            }
+        }
         const data_baru = {
             idCart: nanoid(20),
             id: idProduct.toString(),
@@ -1054,6 +1088,7 @@ const addToCart = async (request, h) => {
 
         }
         await Insert_Supabase('cartproduct', data_baru)
+
         const response = h.response({
             status: 'Success',
             message: 'Add To Cart',
@@ -1088,7 +1123,7 @@ const hapusKeranjang = async (request, h) => {
     const IndexUsername = CartData.findIndex((item) => item.id === id);
     if (IndexUsername !== -1) {
         await deleteData('cartproduct', 'idCart', idProduct);
-        const get_Index_product = CartData[IndexUsername].data.findIndex((item) => item.idCart === id)
+        const get_Index_product = CartData[IndexUsername].data.findIndex((item) => item.idCart === idProduct)
         console.log(CartData[IndexUsername].data)
         console.log(idProduct)
         CartData[IndexUsername].data.splice(get_Index_product, 1)
@@ -1132,7 +1167,6 @@ const GetCartBasedOnSeller = async (request, h) => {
         }
         if (point === 0 && id === item.userID) {
             const data = {
-                id: item.idCart,
                 Seller: item.Seller,
                 username: item.user,
                 idUser: item.userID,
@@ -1847,7 +1881,7 @@ const ChangePass = async (request, h) => {
 }
 
 const AddBio = async (request, h) => {
-    const {id} = request.auth.credentials
+    const { id } = request.auth.credentials
     const { token, data } = request.payload;
 
     const checkedIndex = TokenSetting.findIndex((item) => item.token === token && item.user === id)
@@ -1896,9 +1930,115 @@ const ChangeUsername = async (request, h) => {
     })
     response.code(500);
     return response
+}
 
 
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+const SECRET_CLIENT = process.env.SECRET_CLIENT
+const AuthGoogle = (request, h) => {
+    const redirectUri = "http://localhost:5000/products/callback";
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&scope=email profile`;
 
+    return h.redirect(googleAuthUrl);
+}
+
+const CallBackAuth = async (request, h) => {
+    const code = request.query.code;
+    const redirect_uri = "http://localhost:5000/products/callback"
+
+    let payload = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: SECRET_CLIENT,
+        code: code,
+        grant_type: "authorization_code",
+        redirect_uri: redirect_uri,
+    }).toString()
+
+
+    const endpoint = await fetch("https://oauth2.googleapis.com/token", {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: payload
+    })
+    if (!endpoint) {
+        throw new Error("Failed")
+    }
+    //Mengambil data dalam bentuk json
+    const result = await endpoint.json();
+
+    const id_token = result.id_token;
+    const decoded = jwt.decode(id_token)
+
+    const idAccount = nanoid(10)
+    const username = `${decoded.given_name}${nanoid(10)}`
+
+    //proses Validasi, apakah user yang menggunakan authentication sudah ada dalam table account
+    //jika tidak ada maka akan di daftarkan dengan default pass
+    const checkedAccount = await select_data_user('Account', decoded.email, 'email')
+
+    if (checkedAccount.length === 0) {
+        const AccountData = {
+            id: idAccount,
+            username: username,
+            email: decoded.email,
+            nama: decoded.name,
+            kata_sandi: `${decoded.given_name}${nanoid(10)}`,
+            image: 'user.png',
+            state: null,
+            city: null,
+            road: null,
+            postalCode: null,
+            Bio: null
+        }
+        await Insert_Supabase('Account', AccountData)
+    } else {
+        //check apakah ada seseorang yang memakai account tsb
+        const storeConnections = request.server.app.storeConnections
+        for ([key, value] of Object.entries(storeConnections)) {
+            if (value.user === checkedAccount[0].username) {
+                console.log("kena disini")
+                const redirectToFrontend = "http://localhost:5173/"
+                return h.redirect(`${redirectToFrontend}?using_other_device=${true}&username=${value.user}`);
+            }
+            console.log(value.user)
+            console.log(checkedAccount[0].username)
+        }
+    }
+
+    //mendefenisikan Token untuk masuk.
+    const acces_token = jwt.sign(
+        { 'id': checkedAccount.length !== 0 ? checkedAccount[0].id : idAccount }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
+    )
+
+    const refresh_token = jwt.sign(
+        { 'username': checkedAccount.length !== 0 ? checkedAccount[0].username : username }, SECRET_REFRESH_TOKEN, { 'expiresIn': 7 * 24 * 60 * 60 }
+    )
+
+    const checked = await select_data_user('RefreshToken', checkedAccount.length !== 0 ? checkedAccount[0].id : idAccount, 'idAccount')
+    console.log(checked)
+    if (checked.length === 1) {
+        await deleteData('RefreshToken', 'idAccount', checkedAccount.length !== 0 ? checkedAccount[0].id : idAccount)
+    }
+
+    await Insert_Supabase('RefreshToken', {
+        idAccount: checkedAccount.length !== 0 ? checkedAccount[0].id : idAccount,
+        refreshToken: refresh_token
+    })
+
+    const response = h.response({
+        status: "Success",
+        message: "Login Berhasil",
+        acces_token: acces_token,
+        refresh_token: refresh_token,
+        username: checkedAccount.length !== 0 ? checkedAccount[0].username : username
+    })
+
+    response.code(200)
+
+    const redirectToFrontend = "http://localhost:5173/"
+    return h.redirect(`${redirectToFrontend}?acces_token=${acces_token}&refresh_token=${refresh_token}&username=${checkedAccount.length !== 0 ? checkedAccount[0].username : username}`);
 }
 
 module.exports = {
@@ -1909,5 +2049,5 @@ module.exports = {
     FinishCheckout, GetProcessOrder, VerifyAccount, CheckedToken, CheckAccount, GetMyAccount,
     UploadImage, deletePicture, ChangeImageProfile, Get_Acces, ActionToDeleteCheckout,
     YourProductOrder, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, CheckPass,
-    ChangeName, ChangePass, AddBio, ChangeUsername
+    ChangeName, ChangePass, AddBio, ChangeUsername, AuthGoogle, CallBackAuth
 }

@@ -2,24 +2,35 @@
 
 const { account } = require('./dataset')
 const { GetData, GetProdukBySeller, AddProduct, EditProduct,
-    DeleteProduct, AddAccount, GetDataAccount,
-    GetAccountByUsername, GetCart, addToCart, hapusKeranjang, GetCartBasedOnSeller,
-    EditPcsCart, AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
+    DeleteProduct, AddAccount, GetDataAccount, GetAccountByUsername, GetCart, addToCart,
+    hapusKeranjang, GetCartBasedOnSeller, EditPcsCart, AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
     FinishCheckout, GetProcessOrder, VerifyAccount, CheckedToken, CheckAccount, GetMyAccount,
-    UploadImage,deletePicture,ChangeImageProfile,Get_Acces,ActionToDeleteCheckout,
-    YourProductOrder,SettingStatus,Chatting,GetRoomChat,CheckToRead,DeleteChat,CheckPass,
-    ChangeName,ChangePass,AddBio,ChangeUsername } = require('./handling')
+    UploadImage, deletePicture, ChangeImageProfile, Get_Acces, ActionToDeleteCheckout,
+    YourProductOrder, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, CheckPass,
+    ChangeName, ChangePass, AddBio, ChangeUsername, AuthGoogle,CallBackAuth } = require('./handling')
 
 
 
 const routes = [
     {
+        method : "GET",
+        path : "/products/callback",
+        options: { auth: false },
+        handler : CallBackAuth
+    },
+    {
+        method: "GET",
+        path: "/AuthenticationGoogle",
+        options: { auth: false },
+        handler: AuthGoogle
+    },
+    {
         method: "GET",
         path: "/",
         options: { auth: false },
-        handler: ()=>{
-            return{
-                'Message' : 'API IS RUNNING'
+        handler: () => {
+            return {
+                'Message': 'API IS RUNNING'
             }
         }
     },
@@ -183,7 +194,7 @@ const routes = [
                 output: 'stream', // File diterima dalam bentuk stream
                 parse: true, // Parsing otomatis untuk multipart/form-data
                 allow: 'multipart/form-data', // Izinkan format multipart
-                multipart : true
+                multipart: true
             },
         },
         handler: UploadImage
@@ -240,7 +251,7 @@ const routes = [
                 output: 'stream', // File diterima dalam bentuk stream
                 parse: true, // Parsing otomatis untuk multipart/form-data
                 allow: 'multipart/form-data', // Izinkan format multipart
-                multipart : true
+                multipart: true
             },
         },
         handler: ChangeImageProfile,
