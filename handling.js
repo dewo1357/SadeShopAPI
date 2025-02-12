@@ -962,7 +962,11 @@ const GetCart = async (request, h) => {
         if (checkCart !== -1) {
             CartData.splice(checkCart, 1);
         }
-        CustomerCart = await select_data_user('cartproduct', data[0].id, 'userID');
+        let { data, error } = await supabase
+            .from('cartproduct')
+            .select('*,Seller:Account!SellerID(nama)')
+            .eq('userID', id)
+        CustomerCart = data
         CartData.push({
             id: id,
             data: CustomerCart
@@ -1051,12 +1055,10 @@ const addToCart = async (request, h) => {
             response.code(401)
         }
         //sebelum mendaftarikan. di dahulukan check cart user dahulu, jika ada product yang sama, maka cukup tambahkan pcs nya saja
-        const CartUser = CartData[id]
-        if (CartUser) {
-            const data = CartData[id].data
-            console.log("ketemu")
-            console.log(data)
-            const checkProduct = data.findIndex((item) => item.id === idProduct.toISOString())
+        const CartUserIndex = CartData.findIndex((item) => item.id === id)
+        if (CartUserIndex !== -1) {
+            const data = CartData[CartUserIndex].data
+            const checkProduct = data.findIndex((item) => item.id === idProduct.toString())
             if (checkProduct !== -1) {
                 const getPcs = data[checkProduct].pcs
                 const getIdCart = data[checkProduct].idCart
@@ -1064,7 +1066,7 @@ const addToCart = async (request, h) => {
                 const response = h.response({
                     status: 'Success',
                     message: 'Add To Cart',
-                    data: data_baru,
+
                 })
                 console.log(Cart)
                 response.code(200)
@@ -1084,7 +1086,6 @@ const addToCart = async (request, h) => {
             totalweight: product.weight * pcs,
             userID: id,
             SellerID: SellerID,
-            Seller: product.Seller
 
         }
         await Insert_Supabase('cartproduct', data_baru)
@@ -1167,8 +1168,8 @@ const GetCartBasedOnSeller = async (request, h) => {
         }
         if (point === 0 && id === item.userID) {
             const data = {
-                Seller: item.Seller,
                 username: item.user,
+                Seller : item.Seller.nama,
                 idUser: item.userID,
                 cartProduk: [{
                     id: item.idCart,
@@ -1188,6 +1189,7 @@ const GetCartBasedOnSeller = async (request, h) => {
                 id: item.idCart,
                 indexCategory: item.indexCategory,
                 SellerID: item.SellerID,
+                Seller : item.Seller.nama,
                 title: item.title,
                 pcs: item.pcs,
                 price: item.price,
