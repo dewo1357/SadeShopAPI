@@ -5,9 +5,10 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
 const { supabase } = require('../supabase');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 require("dotenv").config({ path: "../env" })
 
-const {select_data_user,UpdateData,Insert_Supabase,deleteData} = require('./Function')
+const { select_data_user, UpdateData, Insert_Supabase, deleteData } = require('./Function')
 const SettingStatus = async (request, h) => {
     const { id } = request.auth.credentials
     const { id_product_transaction, setValue } = request.payload;
@@ -339,37 +340,60 @@ const ChangeName = async (request, h) => {
     }
 }
 
+const setPass = async (newPassword, newPassword2, id) => {
+    if (newPassword === newPassword2) {
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(newPassword, salt, async (err, hash) => {
+                if (err) {
+                    return false
+                }
+                await UpdateData('Account', 'id', id, [{ kata_sandi: hash }]);
+            })
+
+        })
+        return true
+    }
+    return false
+}
+
 const ChangePass = async (request, h) => {
     const { id } = request.auth.credentials;
     const { oldPassword, newPassword, newPassword2 } = request.payload;
 
-    console.log(oldPassword)
     const account = await select_data_user('Account', id, 'id')
-    if (newPassword === newPassword2) {
-        const result = await bcrypt.compare(oldPassword, account[0].kata_sandi);
-        if (result) {
-            bcrypt.genSalt(10, (err, salt) => {
-                bcrypt.hash(newPassword, salt, async (err, hash) => {
-                    if (err) {
-                        const response = h.response({
-                            Status: 'Error',
-                            Message: 'Failed To Change Pass'
-                        })
-                        response.code(401)
-                        return response
-                    }
-                    await UpdateData('Account', 'id', id, [{ kata_sandi: hash }]);
-                })
-
-            })
+    const result = await bcrypt.compare(oldPassword, account[0].kata_sandi);
+    if (result) {
+        const ChangeMyPass = await setPass(newPassword, newPassword2, id)
+        if (ChangeMyPass) {
             const response = h.response({
                 Status: 'Success',
                 Message: 'Success To Change Pass'
             })
             response.code(200)
-            console.log("Kata Sandi Berhasil Dirubah")
             return response
         }
+    }
+    const response = h.response({
+        Status: 'Error',
+        Message: 'Failed To Change Pass'
+    })
+    response.code(401)
+    return response
+}
+
+const ChangePassForNewUser = async (request, h) => {
+    const { id } = request.auth.credentials;
+    const { newPassword, newPassword2 } = request.payload;
+    console.log(newPassword, newPassword2)
+    const ChangeMyPass = await setPass(newPassword, newPassword2, id)
+
+    if (ChangeMyPass) {
+        const response = h.response({
+            Status: 'Success',
+            Message: 'Success To Change Pass'
+        })
+        response.code(200)
+        return response
     }
     const response = h.response({
         Status: 'Error',
@@ -476,6 +500,7 @@ const CallBackAuth = async (request, h) => {
     //proses Validasi, apakah user yang menggunakan authentication sudah ada dalam table account
     //jika tidak ada maka akan di daftarkan dengan default pass
     const checkedAccount = await select_data_user('Account', decoded.email, 'email')
+    let new_user = false;
 
     if (checkedAccount.length === 0) {
         const AccountData = {
@@ -491,7 +516,41 @@ const CallBackAuth = async (request, h) => {
             postalCode: null,
             Bio: null
         }
+        new_user = true
         await Insert_Supabase('Account', AccountData)
+
+        //Send To Email=======================================
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: 'sadewowidyanto@gmail.com',
+                pass: process.env.PASS_EMAIL
+            },
+            debug: true, // Aktifkan log debug
+            logger: true,
+        })
+
+        const mailMessages = {
+            from: "sadewowidyanto@gmail.com",
+            to: decoded.email,
+            subject: "Selamat Datang 😁",
+            html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+            <h1 style="color: black;">Daftar Akun Berhasil</h1>
+            <p>Terima kasih telah mendaftar account di project prtofolio saya 😁😁. Jangan Lupa memberikan Kata Sandi dengan aman dan jangan lupa untuk memverifikasi akun Anda</p>
+    
+            <p>Jika Anda tidak melakukan pendaftaran, abaikan email ini.</p>
+            <p>Salam, <br> Tim Support</p>
+          </div>
+        `,
+        };
+
+        await transporter.sendMail(mailMessages);
+
+
+        //=====================================================
+
     } else {
         //check apakah ada seseorang yang memakai account tsb
         const storeConnections = request.server.app.storeConnections
@@ -526,6 +585,7 @@ const CallBackAuth = async (request, h) => {
         refreshToken: refresh_token
     })
 
+
     const response = h.response({
         status: "Success",
         message: "Login Berhasil",
@@ -537,12 +597,12 @@ const CallBackAuth = async (request, h) => {
     response.code(200)
 
     const redirectToFrontend = "http://localhost:5173/"
-    return h.redirect(`${redirectToFrontend}?acces_token=${acces_token}&refresh_token=${refresh_token}&username=${checkedAccount.length !== 0 ? checkedAccount[0].username : username}`);
+    return h.redirect(`${redirectToFrontend}?acces_token=${acces_token}&refresh_token=${refresh_token}&username=${checkedAccount.length !== 0 ? checkedAccount[0].username : username}&new_user=${new_user}`);
 }
 
 module.exports = {
-     Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, CheckPass,
-    ChangeName, ChangePass, AddBio, ChangeUsername, AuthGoogle, CallBackAuth
+    Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, CheckPass,
+    ChangeName, ChangePass, AddBio, ChangeUsername, AuthGoogle, CallBackAuth, ChangePassForNewUser
 }
 
 

@@ -3,7 +3,7 @@
 
 const { Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead,
     DeleteChat, CheckPass, ChangeName, ChangePass, AddBio, ChangeUsername,
-    AuthGoogle, CallBackAuth } = require('./Handling/handling')
+    AuthGoogle, CallBackAuth,ChangePassForNewUser } = require('./Handling/handling')
 
 const {
     AddAccount, GetDataAccount,
@@ -21,6 +21,12 @@ const { GetCart, addToCart,hapusKeranjang, GetCartBasedOnSeller,
 
 
 const routes = [
+    {
+        method: "POST",
+        path: "/ChangePassForNewUser",
+        options: { auth: 'jwt-access' },
+        handler: ChangePassForNewUser
+    },
     {
         method: "GET",
         path: "/products/callback",

@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 
-
 const { nanoid } = require('nanoid');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -146,7 +145,7 @@ const VerifyAccount = async (request, h) => {
                 service: "gmail",
                 auth: {
                     user: 'sadewowidyanto@gmail.com',
-                    pass: 'qpax kohx ycul suca'
+                    pass: process.env.PASS_EMAIL
                 },
                 debug: true, // Aktifkan log debug
                 logger: true,
