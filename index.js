@@ -85,12 +85,11 @@ const init = async () => {
         })
         
 
-
         socket.on('Reset', (username) => {
             console.log(username)
             console.log(socket.id)
             for ([key, values] of Object.entries(storeConnections)) {
-                if(values.user===username && values.id === socket.id){
+                if(values.id === socket.id){
                     delete storeConnections[key]
                     console.log(values.user,"terhapus")
                 }

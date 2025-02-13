@@ -246,7 +246,7 @@ const routes = [
     {
         method: 'GET',
         path: '/GetDataAccountByUsername/{username}',
-        options: { auth: false },
+        options: { auth: 'jwt-access' },
         handler: GetAccountByUsername,
     },
 

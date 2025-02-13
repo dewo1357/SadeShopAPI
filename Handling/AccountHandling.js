@@ -270,10 +270,7 @@ const AddAccount = async (request, h) => {
 
 const GetDataAccount = async (request, h) => {
     const storeConnections = request.server.app.storeConnections;
-
     const { username, kata_sandi } = request.payload;
-
-
     const data = await select_data_user('Account', username, 'username')
     console.log("Login Berhasil " + new Date().toISOString())
 
@@ -318,7 +315,8 @@ const GetDataAccount = async (request, h) => {
                 message: "Login Berhasil",
                 acces_token: acces_token,
                 refresh_token: refresh_token,
-                username: username
+                username: username,
+                id: data[0].id
             })
 
             response.code(200)
@@ -334,26 +332,38 @@ const GetDataAccount = async (request, h) => {
 }
 
 const GetAccountByUsername = async (request, h) => {
-    const { id } = request.params
+    const { id } = request.auth.credentials;
+    const { username } = request.params;
 
-    const data = await select_data_user('Account', id, 'id')
-    const product = await select_data_user('Productku', id, 'SellerID')
+    let access = false;
+    const Account = await select_data_user('Account', username, 'username')
+    let { data, err } = await supabase
+        .from("Productku")
+        .select("*,Account:Account!SellerID(username)")
+        .eq("SellerID", Account[0].id)
+    console.log(data)
+    const product = data
 
-    if (data && product) {
+    if (id === Account[0].id) {
+        access = true
+    }
+
+    if (Account && product) {
         const response = h.response({
             status: "Success",
             message: "Account Didapatkan",
             account: {
-                nama: data[0].nama,
-                id: data[0].id,
-                image: data[0].image,
-                username: data[0].username,
-                province: data[0].state,
-                city: data[0].city,
-                road: data[0].road,
-                postalCode: data[0].postalCode
+                nama: Account[0].nama,
+                id: Account[0].id,
+                image: Account[0].image,
+                username: Account[0].username,
+                province: Account[0].state,
+                city: Account[0].city,
+                road: Account[0].road,
+                postalCode: Account[0].postalCode
             },
-            product: product
+            product: product,
+            access: access,
         })
         response.code(200)
         return response
@@ -462,6 +472,7 @@ const CheckAccount = async (request, h) => {
 
 }
 
+///Mau Di Hapus
 const GetMyAccount = async (request, h) => {
     const { id } = request.auth.credentials
     const checkedAccount = await select_data_user('Account', id, 'id')

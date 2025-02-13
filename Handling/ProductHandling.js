@@ -13,7 +13,7 @@ const GetData = async (request, h) => {
     console.log("Get Product Data " + new Date().toISOString())
     let { data, error } = await supabase
         .from('Productku')
-        .select('*,name:Account!SellerID(nama)')
+        .select('*,name:Account!SellerID(nama),Account:Account!SellerID(username)')
 
     const targetSocket = storeConnections[id]; // Pastikan username adalah socket ID atau hubungkan dengan logic mapping
     if (targetSocket) {
@@ -140,6 +140,8 @@ const DeleteProduct = async (request, h) => {
     const { idProduct } = request.params;
 
     if (id) {
+        const data = await select_data_user('Productku',idProduct,'id')
+        await supabase.storage.from('gambarProducts').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/gambarProducts/`, data[0].URLimages])
         const { error } = await supabase
             .from('Productku')
             .delete()
