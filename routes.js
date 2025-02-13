@@ -1,22 +1,31 @@
 /* eslint-disable no-undef */
 
-const { account } = require('./dataset')
-const { GetData, GetProdukBySeller, AddProduct, EditProduct,
-    DeleteProduct, AddAccount, GetDataAccount, GetAccountByUsername, GetCart, addToCart,
-    hapusKeranjang, GetCartBasedOnSeller, EditPcsCart, AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
-    FinishCheckout, GetProcessOrder, VerifyAccount, CheckedToken, CheckAccount, GetMyAccount,
-    UploadImage, deletePicture, ChangeImageProfile, Get_Acces, ActionToDeleteCheckout,
-    YourProductOrder, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, CheckPass,
-    ChangeName, ChangePass, AddBio, ChangeUsername, AuthGoogle,CallBackAuth } = require('./handling')
 
+const { Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead,
+    DeleteChat, CheckPass, ChangeName, ChangePass, AddBio, ChangeUsername,
+    AuthGoogle, CallBackAuth } = require('./Handling/handling')
+
+const {
+    AddAccount, GetDataAccount,
+    GetAccountByUsername, CheckedToken, CheckAccount, GetMyAccount,
+    UploadImage, deletePicture, ChangeImageProfile, VerifyAccount
+} = require('./Handling/AccountHandling')
+
+const { GetData, GetProdukBySeller, AddProduct, EditProduct,
+    DeleteProduct } = require('./Handling/ProductHandling')
+
+const { GetCart, addToCart,hapusKeranjang, GetCartBasedOnSeller,
+    EditPcsCart, AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
+    FinishCheckout, GetProcessOrder, ActionToDeleteCheckout,
+    YourProductOrder } = require('./Handling/CartAndCheckoutHandling')
 
 
 const routes = [
     {
-        method : "GET",
-        path : "/products/callback",
+        method: "GET",
+        path: "/products/callback",
         options: { auth: false },
-        handler : CallBackAuth
+        handler: CallBackAuth
     },
     {
         method: "GET",

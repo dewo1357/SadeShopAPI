@@ -2,7 +2,7 @@
 // eslint-disable no-undef */
 
 const serverless = require('serverless-http');
-const init = require('./index.js');
+const init = require('../index.js');
 
 let handler;
 
