@@ -94,7 +94,6 @@ const deleteData = async (tableName, ColumnReference, Value) => {
         .from(tableName)
         .delete()
         .eq(ColumnReference, Value)
-
     return response
 
 }

@@ -36,7 +36,7 @@ const GetProdukBySeller = async (request, h) => {
 
     let { data, error } = await supabase
         .from('Productku')
-        .select('*,name:Account!SellerID(nama)')
+        .select('*,name:Account!SellerID(nama),Account:Account!SellerID(username)')
         .eq('SellerID', id)
 
 
@@ -86,8 +86,6 @@ const AddProduct = async (request, h) => {
             response.code(201);
             return response
         }
-
-
     }
     const response = h.response({
         status: "Failed",

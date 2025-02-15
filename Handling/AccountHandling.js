@@ -208,7 +208,7 @@ const AddAccount = async (request, h) => {
         .from('Account')
         .select('*')
     data.map((item) => {
-        if (item.username === username || username.includes(" ")) {
+        if (item.username === username || username.includes(" ") || item.email === email) {
             available = true;
         }
     })
@@ -216,7 +216,7 @@ const AddAccount = async (request, h) => {
     if (available) {
         const response = h.response({
             status: "Failed",
-            message: "Username Sudah Ada"
+            message: "No Message"
         })
         response.code(500);
         return response

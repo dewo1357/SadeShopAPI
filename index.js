@@ -53,31 +53,34 @@ const init = async () => {
         console.log("terhubung", socket.id)
        
 
-        socket.on('Register', (username) => {
-            if(storeConnections[username]){
-                storeConnections[username+nanoid(5)] = {
-                    'user': username,
+        socket.on('Register', (account) => {
+            if(storeConnections[account.username]){
+                storeConnections[account.username+nanoid(5)] = {
+                    'user': account.username,
+                    'idUser' : account.id,
                     'id': socket.id,
                     'status': "main"
                 };
                 console.log("pendaftar pertama")
             }else{
-                storeConnections[username] = {
-                    'user': username,
+                storeConnections[account.username] = {
+                    'user': account.username,
+                    'idUser' : account.id,
                     'id': socket.id,
                     'status': "main"
                 };
                 console.log("pendaftar kedua")
             }
             
-            console.log('Toko terdaftar:', username);
+            console.log('Toko terdaftar:', account.username);
             console.log(storeConnections)
             
         })
        
-        socket.on("RegistRoomChat", (username) => {
-            storeConnections[username+nanoid(10)] = {
-                'user': username,
+        socket.on("RegistRoomChat", (account) => {
+            storeConnections[account.username+nanoid(10)] = {
+                'user': account.username,
+                'idUser' : account.id,
                 'id': socket.id,
                 'status': "main"
             };

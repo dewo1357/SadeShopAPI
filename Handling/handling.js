@@ -93,8 +93,8 @@ const GetRoomChat = async (request, h) => {
             PictSend:Account!SenderAccountID(image),PictReceive:Account!ReceiveAccountID(image)')
         .or(`and(SenderAccountID.eq.${id},isDeletedOnAccount1.eq.${false}),\
             and(ReceiveAccountID.eq.${id},isDeletedOnAccount2.eq.${false})`)
+        .order('timestamp',{ascending : true})
 
-    console.log(data)
     let ListChatBasedOnRoom = {}
     let dataCategoryChat = []
     if (data) {
@@ -113,21 +113,25 @@ const GetRoomChat = async (request, h) => {
                 }
 
                 const ListChat = await get_data();
-                console.log(ListChat)
+
 
                 const nUnRead = ListChat.filter((item) =>
                     (item.ReceiveAccountID === id && item.isRead === 'false'))
 
-                console.log(item.idCategory)
-                ListChatBasedOnRoom[item.idCategory] = {
-                    data: ListChat.filter((item) => (item.SenderAccountID === id && item.isDeletedOnAccount1 === false) || (item.ReceiveAccountID === id && item.isDeletedOnAccount2 === false)),
-                }
 
+                //Mengambil Data Chating yang tidak dihapus oleh userID
+                ListChatBasedOnRoom[item.idCategory] = {
+                    data: ListChat.filter((item) => ((item.SenderAccountID === id && item.isDeletedOnAccount1 === false) || (item.ReceiveAccountID === id && item.isDeletedOnAccount2 === false))),
+                }
+                
                 item = { ...item, nUnRead: nUnRead.length }
                 dataCategoryChat.push(item)
 
             })
         )
+
+        console.log("Hasil Data")
+
         const response = h.response({
             status: "Success",
             Message: "Berhasil Mengambil Data",
@@ -196,7 +200,6 @@ const Chatting = async (request, h) => {
             timestamp: timeStamp,
         })
     } else {
-
         await UpdateData('CategoryChat', 'idCategory', data ? data[0].idCategory : idCategoryRoomChat,
             [
                 { isAllRead: false },
@@ -208,44 +211,39 @@ const Chatting = async (request, h) => {
                 { SenderAccountID: id },
                 { ReceiveAccountID: to },
             ])
-
-        //lalu tambahkan kedalam data chat
-        await Insert_Supabase('ChatData', {
-            idCategoryChat: data.length !== 0 ? data[0].idCategory : IdCategoryChat,
-            idChat: nanoid(5),
-            isRead: false,
-            Content: Text,
-            CreatedAt: createdAt,
-            isDeletedOnAccount1: false,
-            isDeletedOnAccount2: false,
-            SenderAccountID: id,
-            ReceiveAccountID: to,
-            id: timeStamp,
-        })
-
-        for ([key, value] of Object.entries(storeConnections)) {
-            if (value.user === to) {
-                console.log("mengirim ke", key)
-                io.to(value.id).emit("ReloadMessage", data.length !== 0 ? data[0].idCategory : IdCategoryChat)
-            }
-            console.log(value, to)
-        }
-        console.log(storeConnections)
-        const response = h.response({
-            status: "Success",
-            message: "Pesan Berhasil Terkirim",
-        })
-        response.code(200)
-        return response
-
     }
-    const response = h.response({
-        status: "Failed",
-        message: "Pesan Gagal Terkirim",
+
+    //lalu tambahkan kedalam data chat
+    await Insert_Supabase('ChatData', {
+        idCategoryChat: data.length !== 0 ? data[0].idCategory : IdCategoryChat,
+        idChat: nanoid(5),
+        isRead: false,
+        Content: Text,
+        CreatedAt: createdAt,
+        isDeletedOnAccount1: false,
+        isDeletedOnAccount2: false,
+        SenderAccountID: id,
+        ReceiveAccountID: to,
+        id: timeStamp,
     })
-    response.code(404)
+
+    for ([key, value] of Object.entries(storeConnections)) {
+        if (value.idUser === to) {
+            console.log("mengirim ke", key)
+            io.to(value.id).emit("ReloadMessage", data.length !== 0 ? data[0].idCategory : IdCategoryChat)
+        }
+        console.log(value, to)
+    }
+  
+    const response = h.response({
+        status: "Success",
+        message: "Pesan Berhasil Terkirim",
+    })
+    response.code(200)
     return response
+
 }
+
 
 const DeleteChat = async (request, h) => {
     const { id } = request.auth.credentials;
@@ -258,7 +256,7 @@ const DeleteChat = async (request, h) => {
         console.log(data)
         for ([key, value] of Object.entries(data[0])) {
             if (value === id) {
-                if (key === 'Sender') {
+                if (key === 'SenderAccountID') {
                     await UpdateData('ChatData', 'idChat', idChat, [{ isDeletedOnAccount1: true }])
                 } else {
                     await UpdateData('ChatData', 'idChat', idChat, [{ isDeletedOnAccount2: true }])

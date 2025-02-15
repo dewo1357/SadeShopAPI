@@ -488,6 +488,7 @@ const CheckOut = async (request, h) => {
             }
         })
     )
+    console.log(CheckOutArray)
     const response = h.response({
         status: 'Success',
         message: "Data Berhasil Di Dapatkan",
@@ -589,7 +590,7 @@ const FinishCheckout = async (request, h) => {
             city: item.city,
             road: item.kecamatan,
             postalCode: item.postalCode,
-            Seller: item.Seller,
+            Seller: item.Seller.nama,
             SellerID: item.SellerID,
             totalPay: item.totalPay,
             BuyerAccountID: item.userID,
@@ -602,8 +603,6 @@ const FinishCheckout = async (request, h) => {
         })
 
         const product = item.product
-
-        
         await Promise.all(
             product.map(async (items) => {
                 const get_username = await select_data_user('Productku', items.id, 'id')
