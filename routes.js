@@ -17,7 +17,7 @@ const { GetData, GetProdukBySeller, AddProduct, EditProduct,
 const { GetCart, addToCart,hapusKeranjang, GetCartBasedOnSeller,
     EditPcsCart, AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
     FinishCheckout, GetProcessOrder, ActionToDeleteCheckout,
-    YourProductOrder } = require('./Handling/CartAndCheckoutHandling')
+    YourProductOrder,CancelCheckout } = require('./Handling/CartAndCheckoutHandling')
 
 
 const routes = [
@@ -26,6 +26,12 @@ const routes = [
         path: "/ChangePassForNewUser",
         options: { auth: 'jwt-access' },
         handler: ChangePassForNewUser
+    },
+    {
+        method: "DELETE",
+        path: "/CancelCheckout/{IdTransaction}",
+        options: {auth: 'jwt-access'},
+        handler: CancelCheckout
     },
     {
         method: "GET",

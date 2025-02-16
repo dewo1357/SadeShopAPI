@@ -42,7 +42,7 @@ const init = async () => {
 
     const io = new Server(server.listener, {
         cors: {
-            origin: "http://localhost:5173",
+            origin: "https://sade-shop-fe.vercel.app",
             methods: ['GET', 'POST']
         }
     });
@@ -108,7 +108,7 @@ const init = async () => {
             }
             for ([key, value] of Object.entries(storeConnections)) {
                 console.log(key)
-                if (value.user === id && value.status == "main") {
+                if (value.user === id && value.status === "main") {
                     io.to(value.id).emit('AskAcces', "Seseorang Meminta Akses")
                     console.log(key, "menerima permintaan")
                 }

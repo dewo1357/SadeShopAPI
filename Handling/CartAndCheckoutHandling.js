@@ -6,7 +6,7 @@ const { nanoid } = require('nanoid');
 const { supabase } = require('../supabase');
 require("dotenv").config({ path: "../env" })
 
-const {select_data_user,Insert_Supabase,UpdateData,deleteData,CheckMessage} = require('./Function')
+const { select_data_user, Insert_Supabase, UpdateData, deleteData, CheckMessage } = require('./Function')
 
 const CartData = [{
     id: '',
@@ -48,7 +48,7 @@ const addToCart = async (request, h) => {
                     status: 'Success',
                     message: 'Add To Cart',
                 })
-               
+
                 response.code(200)
                 return response
             }
@@ -75,7 +75,7 @@ const addToCart = async (request, h) => {
             message: 'Add To Cart',
             data: data_baru,
         })
-        
+
         response.code(200)
         return response
     }
@@ -182,7 +182,7 @@ const GetCartBasedOnSeller = async (request, h) => {
         if (point === 0 && id === item.userID) {
             const data = {
                 username: item.user,
-                Seller : item.Seller.nama,
+                Seller: item.Seller.nama,
                 idUser: item.userID,
                 cartProduk: [{
                     id: item.idCart,
@@ -202,7 +202,7 @@ const GetCartBasedOnSeller = async (request, h) => {
                 id: item.idCart,
                 indexCategory: item.indexCategory,
                 SellerID: item.SellerID,
-                Seller : item.Seller.nama,
+                Seller: item.Seller.nama,
                 title: item.title,
                 pcs: item.pcs,
                 price: item.price,
@@ -237,7 +237,7 @@ const GetCartBasedOnSeller = async (request, h) => {
             status: 'Success',
             message: 'Data Berhasil Didapatkan',
             data: JSON.stringify(CartBasedOnCust),
-    
+
             cartToPay: dataCartToPay,
             totalPrice: TotalPrice,
             TotalItem: TotalItem,
@@ -715,9 +715,43 @@ const YourProductOrder = async (request, h) => {
     return response
 }
 
+const CancelCheckout = async (request, h) => {
+    const { id } = request.auth.credentials
+    const { IdTransaction } = request.params
+    console.log(IdTransaction)
+
+    const CheckoutData = await select_data_user('CheckoutProductDetail', IdTransaction, 'id_transaction_category')
+    if (CheckoutData[0].Status === 'Process') {
+        await supabase.from('CheckoutProductDetail').delete()
+            .eq('id_transaction_category', IdTransaction)
+
+        const { error } = await supabase
+            .from('CheckoutData')
+            .delete()
+            .eq('transaction_id', IdTransaction)
+        if (error) {
+            console.log(error)
+        }
+
+        const response = h.response({
+            Status: "Success",
+            Message: "Delete Checkout Data Success",
+        })
+        response.code(200)
+        return response
+    }
+    const response = h.response({
+        Status: "Failed",
+        Message: "Delete Checkout Data Failed",
+    })
+    response.code(401)
+    return response
+}
+
 
 module.exports = {
-    addToCart, GetCart, hapusKeranjang, GetCartBasedOnSeller,EditPcsCart, 
-    AddToPayCart,getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
-    FinishCheckout, GetProcessOrder, ActionToDeleteCheckout,YourProductOrder,
+    addToCart, GetCart, hapusKeranjang, GetCartBasedOnSeller, EditPcsCart,
+    AddToPayCart, getOngkir, CheckOut, GetOverallCheckout, ShippingSetter,
+    FinishCheckout, GetProcessOrder, ActionToDeleteCheckout, YourProductOrder,
+    CancelCheckout
 }
