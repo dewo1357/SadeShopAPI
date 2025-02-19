@@ -2,7 +2,7 @@
 /* eslint-disable no-undef */
 const { supabase } = require('../supabase');
 require("dotenv").config({ path: "../env" })
-const {select_data_user,UpdateData,Insert_Supabase} = require('./Function')
+const { select_data_user, UpdateData, Insert_Supabase } = require('./Function')
 
 
 const GetData = async (request, h) => {
@@ -138,7 +138,26 @@ const DeleteProduct = async (request, h) => {
     const { idProduct } = request.params;
 
     if (id) {
-        const data = await select_data_user('Productku',idProduct,'id')
+        const ArrayTable = [
+            {
+                TableName : 'cartproduct',
+                columnIdProduct : 'id'
+            },
+            {
+                TableName :  'CheckoutProductDetail',
+                columnIdProduct : 'id_product'   
+            }
+        ]
+        //Menghapus Produk Yang Ada Di Cart Data dan Checkout Data
+        Promise.all(ArrayTable.map(async (item) => {
+            await supabase
+                .from(item.TableName)
+                .delete()
+                .eq(item.columnIdProduct, idProduct)
+        }))
+
+        //lalu eksekusi penghapusan data di dalam Product, termasuk gambar yang ada di storage
+        const data = await select_data_user('Productku', idProduct, 'id')
         await supabase.storage.from('gambarProducts').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/gambarProducts/`, data[0].URLimages])
         const { error } = await supabase
             .from('Productku')
@@ -151,6 +170,7 @@ const DeleteProduct = async (request, h) => {
             status: "success",
             message: "Data Success Di Hapus",
         })
+        console.log("Data Berhasil Dihapus")
         response.code(200)
         return response
     }
@@ -161,8 +181,6 @@ const DeleteProduct = async (request, h) => {
     response.code(500)
     return response;
 }
-
-
 
 module.exports = {
     GetData, GetProdukBySeller, AddProduct, EditProduct,
