@@ -42,7 +42,7 @@ const init = async () => {
 
     const io = new Server(server.listener, {
         cors: {
-            origin: "https://sade-shop-fe.vercel.app",
+            origin: "https://localhost:5173",
             methods: ['GET', 'POST']
         }
     });
@@ -90,7 +90,7 @@ const init = async () => {
             console.log(username)
             console.log(socket.id)
             for ([key, values] of Object.entries(storeConnections)) {
-                if(values.id === socket.id || username === values.user){
+                if(values.id === socket.id){
                     delete storeConnections[key]
                     console.log(values.user,"terhapus")
                 }

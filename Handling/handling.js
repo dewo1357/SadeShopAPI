@@ -287,6 +287,7 @@ const TokenSetting = []; //menampung Nilai Token setting
 const CheckPass = async (request, h) => {
     const { id } = request.auth.credentials;
     const { pass } = request.payload;
+    console.log(id)
 
     const account = await select_data_user('Account', id, 'id')
     console.log(pass)
