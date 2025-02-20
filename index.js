@@ -90,7 +90,7 @@ const init = async () => {
             console.log(username)
             console.log(socket.id)
             for ([key, values] of Object.entries(storeConnections)) {
-                if(values.id === socket.id){
+                if(values.id === socket.id || username === values.user){
                     delete storeConnections[key]
                     console.log(values.user,"terhapus")
                 }
