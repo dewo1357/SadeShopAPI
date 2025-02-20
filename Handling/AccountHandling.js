@@ -344,6 +344,7 @@ const GetAccountByUsername = async (request, h) => {
                 province: Account[0].state,
                 city: Account[0].city,
                 road: Account[0].road,
+                Bio : Account[0].Bio,
                 postalCode: Account[0].postalCode
             },
             product: product,
