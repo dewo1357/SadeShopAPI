@@ -44,21 +44,6 @@ const ChangeImageProfile = async (request, h) => {
         await uploadImagestoSupabase(files, 'ProfilePicture')
         await UpdateData('Account', 'id', id, [{ image: files.hapi.filename }])
 
-        const { data, error } = await supabase
-            .from('CategoryChat')
-            .select('*')
-            .or(`SenderAccountID.eq.${id},ReceiveAccountID.eq.${id}`)
-            .order('timestamp', { ascending: false });
-
-        Promise.all(
-            data.map(async (item) => {
-                if (item.SenderAccountID === id) {
-                    await UpdateData('CategoryChat', 'SenderAccountID', id, [{ SenderPictPathName: files.hapi.filename }])
-                } else {
-                    await UpdateData('CategoryChat', 'ReceiveAccountID', id, [{ ReceivePictPathName: files.hapi.filename }])
-                }
-            })
-        )
         const response = h.response({
             status: "Success",
             message: "Gambar Berhasil Di Upload",

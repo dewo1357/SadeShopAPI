@@ -51,8 +51,6 @@ const init = async () => {
 
     io.on("connection", (socket) => {
         console.log("terhubung", socket.id)
-       
-
         socket.on('Register', (account) => {
             if(storeConnections[account.username]){
                 storeConnections[account.username+nanoid(5)] = {
@@ -137,13 +135,21 @@ const init = async () => {
             }
         })
 
+        socket.on('disconnecting', () => {
+            for ([key, conn] of Object.entries(storeConnections)) {
+                if (socket.id === conn.id) {
+                    delete storeConnections[key]
+                    console.log(socket.id, "terputus")
+                }
+            }
+        })
+
 
         socket.on('disconnect', () => {
             for ([key, conn] of Object.entries(storeConnections)) {
                 if (socket.id === conn.id) {
                     delete storeConnections[key]
                     console.log(socket.id, "terputus")
-                    break
                 }
             }
         })
