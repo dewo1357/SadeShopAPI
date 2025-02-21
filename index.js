@@ -42,7 +42,7 @@ const init = async () => {
 
     const io = new Server(server.listener, {
         cors: {
-            origin: "https://localhost:5173",
+            origin: "https://sade-shop-fe.vercel.app",
             methods: ['GET', 'POST']
         }
     });
