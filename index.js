@@ -135,6 +135,7 @@ const init = async () => {
             }
         })
 
+        /*
         socket.on('disconnecting', () => {
             for ([key, conn] of Object.entries(storeConnections)) {
                 if (socket.id === conn.id) {
@@ -143,6 +144,7 @@ const init = async () => {
                 }
             }
         })
+        */
 
 
         socket.on('disconnect', () => {
