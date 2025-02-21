@@ -318,6 +318,7 @@ const GetDataAccount = async (request, h) => {
 const GetAccountByUsername = async (request, h) => {
     const { id } = request.auth.credentials;
     const { username } = request.params;
+    console.log(username)
 
     let access = false;
     const Account = await select_data_user('Account', username, 'username')
@@ -325,7 +326,7 @@ const GetAccountByUsername = async (request, h) => {
         .from("Productku")
         .select("*,Account:Account!SellerID(username)")
         .eq("SellerID", Account[0].id)
-    console.log(data)
+    console.log(id)
     const product = data
 
     if (id === Account[0].id) {
@@ -350,6 +351,7 @@ const GetAccountByUsername = async (request, h) => {
             product: product,
             access: access,
         })
+        console.log("Berhasil Mendapatkan data account")
         response.code(200)
         return response
     }
