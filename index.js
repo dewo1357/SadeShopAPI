@@ -127,7 +127,7 @@ const init = async () => {
             for ([key, values] of Object.entries(permissonId)) {
                 console.log(key)
                 if (key.includes(username) && !values.status) {
-                    receive.data = { ...receive.data, idSocket: key,isRegist:false }
+                    receive.data = { ...receive.data, idSocket: key,isRegist:true }
                     io.to(values.id).emit('Receive', receive.data)
                     console.log("data", storeConnections[key], "ia Adalah", key, "Berhasil Di Rubah")
                 }
