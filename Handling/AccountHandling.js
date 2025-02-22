@@ -257,6 +257,7 @@ const GetDataAccount = async (request, h) => {
     const { username, kata_sandi } = request.payload;
     const data = await select_data_user('Account', username, 'username')
     console.log("Login Berhasil " + new Date().toISOString())
+    let isFirstUser = false
 
     if (data.length === 1) {
         const result = await bcrypt.compare(kata_sandi, data[0].kata_sandi);
@@ -266,6 +267,9 @@ const GetDataAccount = async (request, h) => {
             for ([token, values] of Object.entries(storeConnections)) {
                 if (value.user === id && value.status === "main") {
                     io.to(value.id).emit('AskAcces', "Seseorang Meminta Akses")
+                    if(!isFirstUser){
+                        isFirstUser = true
+                    }
                 }
             }
 
