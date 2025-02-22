@@ -254,6 +254,7 @@ const AddAccount = async (request, h) => {
 
 const GetDataAccount = async (request, h) => {
     const storeConnections = request.server.app.storeConnections;
+    const io = request.server.app.io;
     const { username, kata_sandi } = request.payload;
     const data = await select_data_user('Account', username, 'username')
     console.log("Login Berhasil " + new Date().toISOString())
