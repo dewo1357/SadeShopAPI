@@ -267,7 +267,7 @@ const GetDataAccount = async (request, h) => {
             //checking apakah ada user sedang memakai account yang sama
             if (storeConnections) {
                 for ([token, value] of Object.entries(storeConnections)) {
-                    if (value.user === username && value.status === "main") {
+                    if (value.user.includes(username) && value.status === "main") {
                         io.to(value.id).emit('AskAcces', "Seseorang Meminta Akses")
                         if (isFirstUser) {
                             isFirstUser = false
