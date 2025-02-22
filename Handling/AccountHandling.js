@@ -264,14 +264,17 @@ const GetDataAccount = async (request, h) => {
         if (result) {
 
             //checking apakah ada user sedang memakai account yang sama
-            for ([token, value] of Object.entries(storeConnections)) {
-                if (value.user === id && value.status === "main") {
-                    io.to(value.id).emit('AskAcces', "Seseorang Meminta Akses")
-                    if(!isFirstUser){
-                        isFirstUser = true
+            if (storeConnections) {
+                for ([token, value] of Object.entries(storeConnections)) {
+                    if (value.user === id && value.status === "main") {
+                        io.to(value.id).emit('AskAcces', "Seseorang Meminta Akses")
+                        if (!isFirstUser) {
+                            isFirstUser = true
+                        }
                     }
                 }
-            }   
+            }
+
 
             const acces_token = jwt.sign(
                 {
