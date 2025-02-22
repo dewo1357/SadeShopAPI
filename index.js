@@ -74,7 +74,7 @@ const init = async () => {
             console.log(storeConnections)
             
         })
-       
+               
         socket.on("RegistRoomChat", (account) => {
             storeConnections[account.username+nanoid(10)] = {
                 'user': account.username,
@@ -85,7 +85,6 @@ const init = async () => {
             console.log(storeConnections)
         })
         
-
         socket.on('Reset', (username) => {
             console.log(username)
             console.log(socket.id)

@@ -261,15 +261,11 @@ const GetDataAccount = async (request, h) => {
     if (data.length === 1) {
         const result = await bcrypt.compare(kata_sandi, data[0].kata_sandi);
         if (result) {
+
             //checking apakah ada user sedang memakai account yang sama
-            for ([key, value] of Object.entries(storeConnections)) {
-                if (value.user === username) {
-                    const response = h.response({
-                        status: "Failed",
-                        message: "Account Sedang digunakan di device lain",
-                    })
-                    response.code(500)
-                    return response
+            for ([token, values] of Object.entries(storeConnections)) {
+                if (value.user === id && value.status === "main") {
+                    io.to(value.id).emit('AskAcces', "Seseorang Meminta Akses")
                 }
             }
 
@@ -279,6 +275,7 @@ const GetDataAccount = async (request, h) => {
                 }, SECRET_ACCESS_TOKEN, { 'expiresIn': 10 * 60 }
             )
 
+            //sesi apabila lolos atau tidak ada user yang menggunakan user lain. 
             const refresh_token = jwt.sign(
                 { username, kata_sandi }, SECRET_REFRESH_TOKEN, { 'expiresIn': 7 * 24 * 60 * 60 }
             )
@@ -291,7 +288,7 @@ const GetDataAccount = async (request, h) => {
 
             await Insert_Supabase('RefreshToken', {
                 idAccount: data[0].id,
-                refreshToken: refresh_token
+                refreshToken: refresh_token,
             })
 
             const response = h.response({
@@ -300,7 +297,8 @@ const GetDataAccount = async (request, h) => {
                 acces_token: acces_token,
                 refresh_token: refresh_token,
                 username: username,
-                id: data[0].id
+                id: data[0].id,
+                isFirstUser: isFirstUser
             })
 
             response.code(200)
@@ -345,7 +343,7 @@ const GetAccountByUsername = async (request, h) => {
                 province: Account[0].state,
                 city: Account[0].city,
                 road: Account[0].road,
-                Bio : Account[0].Bio,
+                Bio: Account[0].Bio,
                 postalCode: Account[0].postalCode
             },
             product: product,
