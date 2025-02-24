@@ -89,9 +89,10 @@ const deletePicture = async (request, h) => {
 
 
 const VerifyAccount = async (request, h) => {
-    const { username } = request.auth.credentials
-    const { id, email, state, city, road, postalCode, pass } = request.payload;
-    console.log(city, road, postalCode, pass)
+    const { id } = request.auth.credentials
+    const { email, state, city, road, postalCode, pass } = request.payload;
+    console.log("Verifikasi Account Sedang Di Proses")
+
 
     const account = await select_data_user('Account', id, 'id')
     const index = account.findIndex((item) => item.id === id)
@@ -324,7 +325,7 @@ const GetDataAccount = async (request, h) => {
 const GetAccountByUsername = async (request, h) => {
     const { id } = request.auth.credentials;
     const { username } = request.params;
-    console.log(username)
+ 
 
     let access = false;
     const Account = await select_data_user('Account', username, 'username')
@@ -371,7 +372,7 @@ const GetAccountByUsername = async (request, h) => {
 }
 
 const CheckedToken = async (request, h) => {
-    const { username } = request.auth.credentials
+    const { id } = request.auth.credentials
     const { token } = request.payload;
 
     //validasi apakah token sudah ada atau belum.
@@ -387,7 +388,7 @@ const CheckedToken = async (request, h) => {
         return response
     }
 
-    const data = await select_data_user('Account', username, 'username');
+    const data = await select_data_user('Account', id, 'id');
     console.log("data")
     if (data.length !== -1) {
         const IndexTokenExpireCheck = AccountTokenExpire.findIndex((item) => item.token === token);

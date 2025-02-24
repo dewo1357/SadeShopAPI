@@ -555,7 +555,6 @@ const CallBackAuth = async (request, h) => {
         const storeConnections = request.server.app.storeConnections
         for ([key, value] of Object.entries(storeConnections)) {
             if (value.user === checkedAccount[0].username) {
-                console.log("kena disini")
                 const redirectToFrontend = "http://localhost:5173/"
                 return h.redirect(`${redirectToFrontend}?using_other_device=${true}&username=${value.user}`);
             }
