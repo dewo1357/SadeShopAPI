@@ -168,26 +168,29 @@ const GetCartBasedOnSeller = async (request, h) => {
     const getCart = CartData.findIndex((item) => item.id === id)
     const CartBasedOnCustomer = CartData[getCart].data
     console.log("pertama")
-    console.log(CartBasedOnCustomer)
     CartBasedOnCustomer.map((item, index) => {
         let point = 0
         if (CartBasedOnCust.length !== 0) {
+            console.log("masukkkkkkkk")
+
             CartBasedOnCust.map((item2, index) => {
-                if (item.Seller === item2.Seller) {
+                console.log(item.SellerID,item2.SellerID)
+                if (item.SellerID === item2.SellerID) {
+                    console.log(item.SellerID,item2.SellerID)
                     Index = index
                     point = 1
                 }
             })
         }
-        if (point === 0 && id === item.userID) {
+        if (point === 0 ) {
             const data = {
                 username: item.user,
                 Seller: item.Seller.nama,
                 idUser: item.userID,
+                SellerID: item.SellerID,
                 cartProduk: [{
                     id: item.idCart,
                     indexCategory: item.indexCategory,
-                    SellerID: item.SellerID,
                     title: item.title,
                     pcs: item.pcs,
                     price: item.price,
@@ -195,14 +198,13 @@ const GetCartBasedOnSeller = async (request, h) => {
                     index: index
                 }]
             }
+            console.log(data)
             CartBasedOnCust.push(data)
         } else if (point == 1) {
             console.log("dijalankan karena ada seller yang sama")
             CartBasedOnCust[Index].cartProduk.push({
                 id: item.idCart,
                 indexCategory: item.indexCategory,
-                SellerID: item.SellerID,
-                Seller: item.Seller.nama,
                 title: item.title,
                 pcs: item.pcs,
                 price: item.price,
