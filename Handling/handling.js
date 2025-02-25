@@ -458,7 +458,7 @@ const ChangeUsername = async (request, h) => {
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
 const SECRET_CLIENT = process.env.SECRET_CLIENT
 const AuthGoogle = (request, h) => {
-    const redirectUri = "http://localhost:5000/products/callback";
+    const redirectUri = "https://cruel-davita-sadeshop-79e55b22.koyeb.app/callback";
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&scope=email profile`;
 
     return h.redirect(googleAuthUrl);
@@ -466,7 +466,7 @@ const AuthGoogle = (request, h) => {
 
 const CallBackAuth = async (request, h) => {
     const code = request.query.code;
-    const redirect_uri = "http://localhost:5000/products/callback"
+    const redirect_uri = "https://cruel-davita-sadeshop-79e55b22.koyeb.app/callback"
 
     let payload = new URLSearchParams({
         client_id: GOOGLE_CLIENT_ID,
@@ -550,17 +550,6 @@ const CallBackAuth = async (request, h) => {
 
         //=====================================================
 
-    } else {
-        //check apakah ada seseorang yang memakai account tsb
-        const storeConnections = request.server.app.storeConnections
-        for ([key, value] of Object.entries(storeConnections)) {
-            if (value.user === checkedAccount[0].username) {
-                const redirectToFrontend = "http://localhost:5173/"
-                return h.redirect(`${redirectToFrontend}?using_other_device=${true}&username=${value.user}`);
-            }
-            console.log(value.user)
-            console.log(checkedAccount[0].username)
-        }
     }
 
     //mendefenisikan Token untuk masuk.
@@ -594,7 +583,7 @@ const CallBackAuth = async (request, h) => {
 
     response.code(200)
 
-    const redirectToFrontend = "http://localhost:5173/"
+    const redirectToFrontend = "https://sade-shop-fe.vercel.app/login"
     return h.redirect(`${redirectToFrontend}?acces_token=${acces_token}&refresh_token=${refresh_token}&username=${checkedAccount.length !== 0 ? checkedAccount[0].username : username}&new_user=${new_user}`);
 }
 
