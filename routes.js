@@ -35,7 +35,7 @@ const routes = [
     },
     {
         method: "GET",
-        path: "/products/callback",
+        path: "/callback",
         options: { auth: false },
         handler: CallBackAuth
     },
