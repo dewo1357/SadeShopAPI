@@ -196,7 +196,7 @@ const routes = [
     {
         method: "GET",
         path: "/MasterData",
-        options: { auth: 'jwt-access' },
+        options: { auth: false },
         handler: GetData
     },
     {

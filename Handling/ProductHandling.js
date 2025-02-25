@@ -6,7 +6,7 @@ const { select_data_user, UpdateData, Insert_Supabase } = require('./Function')
 
 
 const GetData = async (request, h) => {
-    const { id } = request.auth.credentials;
+   
     const io = request.server.app.io;
     const storeConnections = request.server.app.storeConnections;
 
@@ -15,11 +15,6 @@ const GetData = async (request, h) => {
         .from('Productku')
         .select('*,name:Account!SellerID(nama),Account:Account!SellerID(username)')
 
-    const targetSocket = storeConnections[id]; // Pastikan username adalah socket ID atau hubungkan dengan logic mapping
-    if (targetSocket) {
-        io.to(targetSocket).emit("Message", "SELAMAT DATANG")
-        console.log("pesan terkirim kepada", targetSocket)
-    }
 
     const response = h.response({
         status: "success",
