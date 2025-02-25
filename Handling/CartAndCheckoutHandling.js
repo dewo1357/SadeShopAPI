@@ -611,7 +611,7 @@ const FinishCheckout = async (request, h) => {
 
                 for ([key, value] of Object.entries(storeConnections)) {
                     console.log(storeConnections[key])
-                    if (value.id === get_username[0].SellerID) {
+                    if (value.idUser === get_username[0].SellerID) {
                         io.to(value.id).emit('Notification', "Ada yang pesan Produk Kamu! Cek Sekarang Juga!")
                         console.log("pesan terikirim")
                         break
