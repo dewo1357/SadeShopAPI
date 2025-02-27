@@ -556,7 +556,9 @@ const ShippingSetter = (request, h) => {
 const ActionToDeleteCheckout = (request, h) => {
     const { id } = request.auth.credentials;
     console.log("HAPUS CHECKOUTTT")
-    const checkoutDataBaru = CheckOutArray.filter((item) => item.user !== id)
+    console.log(CheckOutArray)
+
+    const checkoutDataBaru = CheckOutArray.filter((item) => item.userID !== id)
     const CartToPayBaru = CartToPay.filter((item) => item.userID !== id)
     CheckOutArray = checkoutDataBaru
     CartToPay = CartToPayBaru
