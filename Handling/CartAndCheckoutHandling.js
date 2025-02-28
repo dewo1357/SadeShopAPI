@@ -552,7 +552,7 @@ const ShippingSetter = (request, h) => {
         })
         return response
     }
-}
+}   
 const ActionToDeleteCheckout = (request, h) => {
     const { id } = request.auth.credentials;
     console.log("HAPUS CHECKOUTTT")

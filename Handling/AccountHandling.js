@@ -190,21 +190,19 @@ const AddAccount = async (request, h) => {
     const id = nanoid(15);
     let available = false
 
-    let { data, error } = await supabase
-        .from('Account')
-        .select('*')
-    data.map((item) => {
-        if (item.username === username || username.includes(" ") || item.email === email) {
-            available = true;
-        }
-    })
+    const checkAccount = await select_data_user('Account',email,'email')
+    const require_email = ["yahoo","gmail"]
+
+    if((!email.includes(require_email) || username.includes(" ") ||checkAccount.length!==0 )){
+        available = true;
+    }
 
     if (available) {
         const response = h.response({
             status: "Failed",
             message: "No Message"
         })
-        response.code(500);
+        response.code(401);
         return response
     }
 
