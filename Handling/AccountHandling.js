@@ -146,7 +146,7 @@ const VerifyAccount = async (request, h) => {
         <h1 style="color: black;">Verifikasi Akun Anda</h1>
         <p>Halo,</p>
         <p>Terima kasih telah verifikasi account project prtofolio saya 😁😁. Silakan klik tombol di bawah untuk memverifikasi akun Anda:</p>
-        <a href="https://cruel-davita-sadeshop-79e55b22.koyeb.app/verify/${token}"
+        <a href="https://sade-shop-fe.vercel.app/verify/${token}"
            style="display: inline-block; background-color: black; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
            Verifikasi Sekarang
         </a>
@@ -370,7 +370,6 @@ const GetAccountByUsername = async (request, h) => {
 }
 
 const CheckedToken = async (request, h) => {
-    const { id } = request.auth.credentials
     const { token } = request.payload;
 
     //validasi apakah token sudah ada atau belum.

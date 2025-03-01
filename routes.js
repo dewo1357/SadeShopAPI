@@ -142,7 +142,7 @@ const routes = [
     {
         method: "POST",
         path: "/CheckedToken",
-        options: { auth: 'jwt-access' },
+        options: { auth: false },
         handler: CheckedToken
     },
     {
