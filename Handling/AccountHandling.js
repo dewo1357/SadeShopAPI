@@ -190,10 +190,10 @@ const AddAccount = async (request, h) => {
     const id = nanoid(15);
     let available = false
 
-    const checkAccount = await select_data_user('Account',email,'email')
-    const require_email = ["yahoo","gmail"]
+    const checkAccount = await select_data_user('Account', email, 'email')
+    const require_email = ["yahoo", "gmail"]
 
-    if((!email.includes(require_email) || username.includes(" ") ||checkAccount.length!==0 )){
+    if ((!email.includes(require_email) || username.includes(" ") || checkAccount.length !== 0)) {
         available = true;
     }
 
@@ -323,7 +323,7 @@ const GetDataAccount = async (request, h) => {
 const GetAccountByUsername = async (request, h) => {
     const { id } = request.auth.credentials;
     const { username } = request.params;
- 
+
 
     let access = false;
     const Account = await select_data_user('Account', username, 'username')
@@ -385,54 +385,45 @@ const CheckedToken = async (request, h) => {
         return response
     }
 
-    const data = await select_data_user('Account', id, 'id');
-    console.log("data")
-    if (data.length !== -1) {
-        const IndexTokenExpireCheck = AccountTokenExpire.findIndex((item) => item.token === token);
-        console.log(IndexTokenExpireCheck)
-        if (IndexTokenExpireCheck !== -1) {
-            const idAccount = AccountTokenExpire[IndexTokenExpireCheck].idAccount;
-            const VerifyAt = new Date().getTime();
-            //validasi Selisih, Jika Sudah melewati 5menit. maka token sudah expired untuk di verifikasi
-            const acuan = 20 * 60000
-            const hitung_selisih = VerifyAt - AccountTokenExpire[IndexTokenExpireCheck].insertAtTime
-            console.log(hitung_selisih)
-            if (hitung_selisih < acuan) {
-                await Insert_Supabase('AccountToken', {
-                    idAccount: idAccount,
-                    token: token,
-                })
-                const response = h.response({
-                    status: "Success",
-                    message: "Account Berhasil Verifikasi",
-                })
-                response.code(200)
-                return response
-            } else {
-                const response = h.response({
-                    status: "Failed",
-                    message: "Token sudah expired",
-                })
-                response.code(401)
-                return response
-            }
-
-
+    const IndexTokenExpireCheck = AccountTokenExpire.findIndex((item) => item.token === token);
+    console.log(IndexTokenExpireCheck)
+    if (IndexTokenExpireCheck !== -1) {
+        const idAccount = AccountTokenExpire[IndexTokenExpireCheck].idAccount;
+        const VerifyAt = new Date().getTime();
+        //validasi Selisih, Jika Sudah melewati 5menit. maka token sudah expired untuk di verifikasi
+        const acuan = 20 * 60000
+        const hitung_selisih = VerifyAt - AccountTokenExpire[IndexTokenExpireCheck].insertAtTime
+        console.log(hitung_selisih)
+        if (hitung_selisih < acuan) {
+            await Insert_Supabase('AccountToken', {
+                idAccount: idAccount,
+                token: token,
+            })
+            const response = h.response({
+                status: "Success",
+                message: "Account Berhasil Verifikasi",
+            })
+            response.code(200)
+            return response
         } else {
             const response = h.response({
                 status: "Failed",
-                message: "Token Tidak Ditemukan",
+                message: "Token sudah expired",
             })
             response.code(401)
             return response
         }
+
+
+    } else {
+        const response = h.response({
+            status: "Failed",
+            message: "Token Tidak Ditemukan",
+        })
+        response.code(401)
+        return response
     }
-    const response = h.response({
-        status: "Failed",
-        message: "Account Tidak Ditemukan",
-    })
-    response.code(404)
-    return response
+   
 }
 
 const CheckAccount = async (request, h) => {
