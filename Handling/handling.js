@@ -285,9 +285,9 @@ const DeleteCategoryChat = async (request, h) => {
     const data = await select_data_user('CategoryChat', idCategoryChat, 'idCategoryChat')
     if (data.length !== 0) {
         if (id === data[0].SenderAccountID) {
-            await UpdateData('CategoryChat', 'idCategoryChat', idCategoryChat, { isDeletedOnAccount1: true })
+            await UpdateData('CategoryChat', 'idCategory', idCategoryChat, { isDeletedOnAccount1: true })
         } else {
-            await UpdateData('CategoryChat', 'idCategoryChat', idCategoryChat, { isDeletedOnAccount2: true })
+            await UpdateData('CategoryChat', 'idCategory', idCategoryChat, { isDeletedOnAccount2: true })
         }
         await UpdateData('ChatData', 'SenderAccountID', id, [{ isDeletedOnAccount1: true }])
         await UpdateData('ChatData', 'ReceiveAccountID', id, [{ isDeletedOnAccount2: true }])
