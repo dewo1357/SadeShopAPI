@@ -188,16 +188,24 @@ const VerifyAccount = async (request, h) => {
 const AddAccount = async (request, h) => {
     const { username, email, nama, kata_sandi, kata_sandi2, image } = request.payload;
     const id = nanoid(15);
-    let available = false
+   
 
     const checkAccount = await select_data_user('Account', email, 'email')
-    const require_email = ["yahoo", "gmail"]
+    const require_email = ["@yahoo.com", "@gmail.com","@yahoo.co.id", "@gmail.co.id"]
+    let isValidEmail = false
+    require_email.map((item)=>{
+        if(email.includes(item)){
+            isValidEmail=true
+            return
+        }
+    })
 
-    if ((!email.includes(require_email) || username.includes(" ") || checkAccount.length !== 0)) {
+    const validation = !isValidEmail || username.includes(" ") || checkAccount.length !== 0
+    if (validation) {
         available = true;
-    }
-
-    if (available) {
+        console.log("email : ",isValidEmail)
+        console.log("Username L : ",username.includes(" "))
+        console.log("Account Sudah tersedia : ",checkAccount.length !== 0)
         const response = h.response({
             status: "Failed",
             message: "No Message"
@@ -205,6 +213,7 @@ const AddAccount = async (request, h) => {
         response.code(401);
         return response
     }
+
 
     if (kata_sandi === kata_sandi2) {
         bcrypt.genSalt(10, (err, salt) => {

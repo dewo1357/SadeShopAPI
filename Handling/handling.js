@@ -83,17 +83,18 @@ const Get_Acces = async (request, h) => {
 
 const GetRoomChat = async (request, h) => {
     const { id } = request.auth.credentials
+    console.log(id)
 
     const { data, error } = await supabase
         .from('CategoryChat')
-        .select('idCategory,LastContent,CreatedAt,\
+        .select('idCategory,CreatedAt,\
             SenderAccountID,ReceiveAccountID,\
             userReceive:Account!ReceiveAccountID(username),\
             usernameSend:Account!SenderAccountID(username),\
             PictSend:Account!SenderAccountID(image),PictReceive:Account!ReceiveAccountID(image)')
         .or(`and(SenderAccountID.eq.${id},isDeletedOnAccount1.eq.${false}),\
             and(ReceiveAccountID.eq.${id},isDeletedOnAccount2.eq.${false})`)
-        .order('timestamp',{ascending : true})
+        .order('timestamp', { ascending: true })
 
     let ListChatBasedOnRoom = {}
     let dataCategoryChat = []
@@ -123,7 +124,7 @@ const GetRoomChat = async (request, h) => {
                 ListChatBasedOnRoom[item.idCategory] = {
                     data: ListChat.filter((item) => ((item.SenderAccountID === id && item.isDeletedOnAccount1 === false) || (item.ReceiveAccountID === id && item.isDeletedOnAccount2 === false))),
                 }
-                
+
                 item = { ...item, nUnRead: nUnRead.length }
                 dataCategoryChat.push(item)
 
@@ -190,7 +191,6 @@ const Chatting = async (request, h) => {
         await Insert_Supabase('CategoryChat', {
             idCategory: IdCategoryChat,
             StatusChat: 'Private',
-            LastContent: Text,
             isAllRead: false,
             CreatedAt: createdAt,
             isDeletedOnAccount1: false,
@@ -203,7 +203,6 @@ const Chatting = async (request, h) => {
         await UpdateData('CategoryChat', 'idCategory', data ? data[0].idCategory : idCategoryRoomChat,
             [
                 { isAllRead: false },
-                { LastContent: Text },
                 { CreatedAt: createdAt },
                 { timestamp: timeStamp },
                 { isDeletedOnAccount1: false },
@@ -234,7 +233,7 @@ const Chatting = async (request, h) => {
         }
         console.log(value, to)
     }
-  
+
     const response = h.response({
         status: "Success",
         message: "Pesan Berhasil Terkirim",
@@ -280,6 +279,33 @@ const DeleteChat = async (request, h) => {
     return response
 }
 
+const DeleteCategoryChat = async (request, h) => {
+    const { id } = request.auth.credentials
+    const { idCategoryChat } = request.params
+    const data = await select_data_user('CategoryChat', idCategoryChat, 'idCategoryChat')
+    if (data.length !== 0) {
+        if (id === data[0].SenderAccountID) {
+            await UpdateData('CategoryChat', 'idCategoryChat', idCategoryChat, { isDeletedOnAccount1: true })
+        } else {
+            await UpdateData('CategoryChat', 'idCategoryChat', idCategoryChat, { isDeletedOnAccount2: true })
+        }
+        await UpdateData('ChatData', 'SenderAccountID', id, [{ isDeletedOnAccount1: true }])
+        await UpdateData('ChatData', 'ReceiveAccountID', id, [{ isDeletedOnAccount2: true }])
+
+        const response = h.response({
+            'Status' : "Success",
+            'Message' : 'Success Delete'
+        })
+        response.code(200)
+        return response
+    }
+    const response = h.response({
+        'Status' : "Failed",
+        'Message' : 'Failed Delete'
+    })
+    response.code(404)
+    return response
+}
 
 //===========================SETTING HANDLING=======================/
 
@@ -588,7 +614,7 @@ const CallBackAuth = async (request, h) => {
 }
 
 module.exports = {
-    Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, CheckPass,
+    Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat,DeleteCategoryChat, CheckPass,
     ChangeName, ChangePass, AddBio, ChangeUsername, AuthGoogle, CallBackAuth, ChangePassForNewUser
 }
 

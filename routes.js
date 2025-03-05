@@ -3,7 +3,7 @@
 
 const { Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead,
     DeleteChat, CheckPass, ChangeName, ChangePass, AddBio, ChangeUsername,
-    AuthGoogle, CallBackAuth,ChangePassForNewUser } = require('./Handling/handling')
+    AuthGoogle, CallBackAuth,ChangePassForNewUser,DeleteCategoryChat } = require('./Handling/handling')
 
 const {
     AddAccount, GetDataAccount,
@@ -84,6 +84,12 @@ const routes = [
         path: "/CheckPass",
         options: { auth: 'jwt-access' },
         handler: CheckPass
+    },
+    {
+        method: "DELETE",
+        path: "/DeleteChat/{idCategory}",
+        options: { auth: 'jwt-access' },
+        handler: DeleteCategoryChat
     },
     {
         method: "DELETE",
