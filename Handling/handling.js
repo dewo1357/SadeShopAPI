@@ -282,7 +282,7 @@ const DeleteChat = async (request, h) => {
 const DeleteCategoryChat = async (request, h) => {
     const { id } = request.auth.credentials
     const { idCategoryChat } = request.params
-    const data = await select_data_user('CategoryChat', idCategoryChat, 'idCategoryChat')
+    const data = await select_data_user('CategoryChat', idCategoryChat, 'idCategory')
     if (data.length !== 0) {
         if (id === data[0].SenderAccountID) {
             await UpdateData('CategoryChat', 'idCategory', idCategoryChat, { isDeletedOnAccount1: true })
