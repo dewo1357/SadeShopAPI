@@ -91,61 +91,70 @@ const GetRoomChat = async (request, h) => {
             SenderAccountID,ReceiveAccountID,\
             userReceive:Account!ReceiveAccountID(username),\
             usernameSend:Account!SenderAccountID(username),\
+            isDeletedOnAccount1,isDeletedOnAccount2,\
             PictSend:Account!SenderAccountID(image),PictReceive:Account!ReceiveAccountID(image)')
-        .or(`and(SenderAccountID.eq.${id},isDeletedOnAccount1.eq.${false}),\
-            and(ReceiveAccountID.eq.${id},isDeletedOnAccount2.eq.${false})`)
+        .or(`SenderAccountID.eq.${id},ReceiveAccountID.eq.${id}`)
         .order('timestamp', { ascending: true })
 
-    let ListChatBasedOnRoom = {}
-    let dataCategoryChat = []
-    if (data) {
-        await Promise.all(
-            data.map(async (item) => {
+    if (data.length !== 0) {
+        const dataCategory = data.filter((item) =>
+        ((item.SenderAccountID === id && item.isDeletedOnAccount1 === false)
+            ||
+            item.ReceiveAccountID === id && item.isDeletedOnAccount2 === false)
+        )
+        console.log(data)
+        console.log(dataCategory)
 
-                const get_data = async () => {
-                    let { data, error } = await supabase
-                        .from('ChatData')
-                        .select("idChat,Content,isRead,isDeletedOnAccount1,\
+        let ListChatBasedOnRoom = {}
+        let dataCategoryChat = []
+        if (dataCategory.length !== 0) {
+            await Promise.all(
+                dataCategory.map(async (item) => {
+                    const get_data = async () => {
+                        let { data, error } = await supabase
+                            .from('ChatData')
+                            .select("idChat,Content,isRead,isDeletedOnAccount1,\
                             isDeletedOnAccount2,CreatedAt,ReceiveAccountID,SenderAccountID,\
                             Sender:Account!SenderAccountID(username),Receive:Account!ReceiveAccountID(username)")
-                        .eq('idCategoryChat', item.idCategory)
-                        .order('id', { ascending: true }); // Use { ascending: false } for descending order
-                    return data
-                }
+                            .eq('idCategoryChat', item.idCategory)
+                            .order('id', { ascending: true }); // Use { ascending: false } for descending order
+                        return data
+                    }
 
-                const ListChat = await get_data();
+                    const ListChat = await get_data();
+
+                    const nUnRead = ListChat.filter((item) =>
+                        (item.ReceiveAccountID === id && item.isRead === 'false'))
 
 
-                const nUnRead = ListChat.filter((item) =>
-                    (item.ReceiveAccountID === id && item.isRead === 'false'))
+                    //Mengambil Data Chating yang tidak dihapus oleh userID
+                    ListChatBasedOnRoom[item.idCategory] = {
+                        data: ListChat.filter((item) => ((item.SenderAccountID === id && item.isDeletedOnAccount1 === false) || (item.ReceiveAccountID === id && item.isDeletedOnAccount2 === false))),
+                    }
 
+                    item = { ...item, nUnRead: nUnRead.length }
+                    dataCategoryChat.push(item)
 
-                //Mengambil Data Chating yang tidak dihapus oleh userID
-                ListChatBasedOnRoom[item.idCategory] = {
-                    data: ListChat.filter((item) => ((item.SenderAccountID === id && item.isDeletedOnAccount1 === false) || (item.ReceiveAccountID === id && item.isDeletedOnAccount2 === false))),
-                }
+                })
+            )
 
-                item = { ...item, nUnRead: nUnRead.length }
-                dataCategoryChat.push(item)
+            console.log("Hasil Data")
 
+            const response = h.response({
+                status: "Success",
+                Message: "Berhasil Mengambil Data",
+                data: dataCategoryChat,
+                ListChat: ListChatBasedOnRoom
             })
-        )
-
-        console.log("Hasil Data")
-
-        const response = h.response({
-            status: "Success",
-            Message: "Berhasil Mengambil Data",
-            data: dataCategoryChat,
-            ListChat: ListChatBasedOnRoom
-        })
-        response.code(200)
-        return response
+            response.code(200)
+            return response
+        }
     }
+
     const response = h.response({
         status: "Failed",
         Message: "Gagal Mengambil Data",
-        data: data
+        data: []
     })
     response.code(404)
     return response
@@ -186,6 +195,7 @@ const Chatting = async (request, h) => {
         .or(`and(SenderAccountID.eq.${id},ReceiveAccountID.eq.${to}),and(SenderAccountID.eq.${to},ReceiveAccountID.eq.${id})`)
         .order('timestamp', { ascending: true });
 
+    console.log("data ada atau tidak")
     console.log(data)
     if (!idCategoryRoomChat && data.length === 0) {
         await Insert_Supabase('CategoryChat', {
@@ -282,26 +292,34 @@ const DeleteChat = async (request, h) => {
 const DeleteCategoryChat = async (request, h) => {
     const { id } = request.auth.credentials
     const { idCategoryChat } = request.params
-    const data = await select_data_user('CategoryChat', idCategoryChat, 'idCategory')
+    const data = await select_data_user("CategoryChat", idCategoryChat, "idCategory")
+    console.log(data)
     if (data.length !== 0) {
         if (id === data[0].SenderAccountID) {
-            await UpdateData('CategoryChat', 'idCategory', idCategoryChat, { isDeletedOnAccount1: true })
+            await UpdateData('CategoryChat', 'idCategory', idCategoryChat, [{ isDeletedOnAccount1: true }])
         } else {
-            await UpdateData('CategoryChat', 'idCategory', idCategoryChat, { isDeletedOnAccount2: true })
+            await UpdateData('CategoryChat', 'idCategory', idCategoryChat, [{ isDeletedOnAccount2: true }])
         }
-        await UpdateData('ChatData', 'SenderAccountID', id, [{ isDeletedOnAccount1: true }])
-        await UpdateData('ChatData', 'ReceiveAccountID', id, [{ isDeletedOnAccount2: true }])
 
+        const CheckData = await select_data_user('ChatData',idCategoryChat,'idCategoryChat')
+        Promise.all(CheckData.map(async(item)=>{
+            if(id == item.SenderAccountID){
+                await UpdateData('ChatData', 'idChat', item.idChat, [{ isDeletedOnAccount1: true }])
+            }else{
+                await UpdateData('ChatData', 'idChat', item.idChat, [{ isDeletedOnAccount2: true }])   
+            }
+        }))
+        
         const response = h.response({
-            'Status' : "Success",
-            'Message' : 'Success Delete'
+            'Status': "Success",
+            'Message': 'Success Delete'
         })
         response.code(200)
         return response
     }
     const response = h.response({
-        'Status' : "Failed",
-        'Message' : 'Failed Delete'
+        'Status': "Failed",
+        'Message': 'Failed Delete'
     })
     response.code(404)
     return response
@@ -614,7 +632,7 @@ const CallBackAuth = async (request, h) => {
 }
 
 module.exports = {
-    Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat,DeleteCategoryChat, CheckPass,
+    Get_Acces, SettingStatus, Chatting, GetRoomChat, CheckToRead, DeleteChat, DeleteCategoryChat, CheckPass,
     ChangeName, ChangePass, AddBio, ChangeUsername, AuthGoogle, CallBackAuth, ChangePassForNewUser
 }
 

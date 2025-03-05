@@ -87,7 +87,7 @@ const routes = [
     },
     {
         method: "DELETE",
-        path: "/deleteCategoryChat/{idCategory}",
+        path: "/deleteCategoryChat/{idCategoryChat}",
         options: { auth: 'jwt-access' },
         handler: DeleteCategoryChat
     },
