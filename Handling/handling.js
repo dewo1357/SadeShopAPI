@@ -163,8 +163,12 @@ const GetRoomChat = async (request, h) => {
 const CheckToRead = async (request, h) => {
     const { id } = request.auth.credentials;
     const { IdCategoryChat } = request.params;
+    console.log(IdCategoryChat)
 
     const checkCategoryChat = await select_data_user('CategoryChat', IdCategoryChat, 'idCategory');
+    console.log("HASIL CATEGORY")
+    console.log(checkCategoryChat)
+    
     if (checkCategoryChat[0].ReceiveAccountID === id) {
         await UpdateData('CategoryChat', 'idCategory', IdCategoryChat, [{ isAllRead: true }])
         await UpdateData('ChatData', 'idCategoryChat', IdCategoryChat, [{ isRead: true }])
