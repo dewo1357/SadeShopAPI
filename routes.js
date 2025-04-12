@@ -23,10 +23,10 @@ const { GetCart, addToCart,hapusKeranjang, GetCartBasedOnSeller,
 const {AddModule,AddImageModule,GetModule,GetModuleByAccount,
     DeleteModule,SettingModule,AddSubModule,GetSubModulById,
     SettingSubModule,DeleteSubModule,AddToPlaylistModule,GetMyplaylistModule,
-    DeletePlaylistModule,Exercise,SubmitExercise,GetExerCise,SubmitFinishExercise} = require("./handlingSCC/Module")
+    DeletePlaylistModule,Exercise,SubmitExercise,GetExerCise,SubmitFinishExercise} = require("./HandlingSCC/Module")
 
-const {AccountRegist , SignInAccount,CheckAuthor} = require("./handlingSCC/Account")
-const {ValidatePassword,ChangePassword,SettingProfile} = require("./handlingSCC/Setting")
+const {AccountRegist , SignInAccount,CheckAuthor} = require("./HandlingSCC/Account")
+const {ValidatePassword,ChangePassword,SettingProfile} = require("./HandlingSCC/Setting")
 const routes = [
     {
         method: "POST",
