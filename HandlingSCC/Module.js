@@ -43,7 +43,7 @@ const GetModule = async (request, h) => {
 const AddImageModule = async (request, h) => {
     const { username } = request.auth.credentials;
     const { files } = request.payload;
-    console.log(files)
+    
     await uploadImagestoSupabase(files, 'modulepicture')
     const response = h.response({
         'Status': "Success",
@@ -121,6 +121,10 @@ const SettingModule = async (request, h) => {
     const data = [
         { Title }, { SubTitle }, { Description }, { ContentHtml }, { PictureName }
     ]
+    const dataModule = await SelectBasedOnUser('Module','id',idModule)
+    if(dataModule[0].PictureName !== PictureName){
+        await supabase.storage.from('modulepicture').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/modulepicture/`, dataModule[0].image])
+    }
     console.log(data)
     await EditData('Module', 'id', idModule, data)
     const response = h.response({
@@ -138,6 +142,10 @@ const SettingSubModule = async (request, h) => {
     const data = [
         { SubTitle }, { Description }, { ContentHtml }, { PictureName },{LinkEmbed}
     ]
+    const dataModule = await SelectBasedOnUser('SubModule','id',idModule)
+    if(dataModule[0].PictureName !== PictureName){
+        await supabase.storage.from('modulepicture').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/modulepicture/`, dataModule[0].image])
+    }
     console.log(data)
     await EditData('SubModule', 'id', idModule, data)
     const response = h.response({
