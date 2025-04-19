@@ -122,8 +122,11 @@ const SettingModule = async (request, h) => {
         { Title }, { SubTitle }, { Description }, { ContentHtml }, { PictureName }
     ]
     const dataModule = await SelectBasedOnUser('Module','id',idModule)
+    console.log(dataModule)
+    console.log(PictureName)
     if(dataModule[0].PictureName !== PictureName){
-        await supabase.storage.from('modulepicture').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/modulepicture/`, dataModule[0].image])
+        console.log("process delete")
+        await supabase.storage.from('modulepicture').remove([`${process.env.URL_KEY}/storage/v1/object/public/modulepicture//`, dataModule[0].PictureName])
     }
     console.log(data)
     await EditData('Module', 'id', idModule, data)
@@ -144,7 +147,7 @@ const SettingSubModule = async (request, h) => {
     ]
     const dataModule = await SelectBasedOnUser('SubModule','id',idModule)
     if(dataModule[0].PictureName !== PictureName){
-        await supabase.storage.from('modulepicture').remove([`${process.env.SUPABASE_URL}/storage/v1/object/public/modulepicture/`, dataModule[0].image])
+        await supabase.storage.from('modulepicture').remove([`${process.env.URL_KEY}/storage/v1/object/public/modulepicture//`, dataModule[0].PictureName])
     }
     console.log(data)
     await EditData('SubModule', 'id', idModule, data)
