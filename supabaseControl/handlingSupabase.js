@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 const { supabase } = require('./supabase');
 
-
 const uploadImagestoSupabase = async (files, bucket) => {
     if (files) {
         console.log(files)
