@@ -405,7 +405,7 @@ const Login = async (request, h) => {
 
   const access_token = jwt.sign(
     {
-      username: GetAccount[0].username
+      username: username
     },
     SECRET_ACCESS_TOKEN,
     {'expiresIn': 14 * 24 * 60 * 60 }
