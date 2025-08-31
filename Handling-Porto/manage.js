@@ -388,6 +388,7 @@ const verifyToken = (token) => {
 
 const jwt = require('jsonwebtoken')
 const SECRET_ACCESS_TOKEN = 'access_secret_key'
+require('dotenv').config({path : './.env'})
 const Login = async (request, h) => {
   const { username, password } = request.payload
   const getPass = process.env.pass
