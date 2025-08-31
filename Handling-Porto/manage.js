@@ -297,7 +297,7 @@ const deleteBlog = async (request, h) => {
 
 // GET All
 const getExperiences = async (request, h) => {
-  console.log("okokok")
+  console.log('okokok')
   const Data = await GetData('Experience')
   if (!Data) {
     return h.response({ status: 'failed' }).code(400)
@@ -371,13 +371,13 @@ const getBlogById = async (request, h) => {
     : h.response({ message: 'Not found' }).code(404)
 }
 
-const verifyToken = (token) => {
+const verifyToken = token => {
   try {
-    // verify a token symmetric
-    jwt.verify(token, SECRET_ACCESS_TOKEN, function (err, decoded) {
-      console.log(decoded.username) 
-    })
-    return { isValid: true }
+    const decoded = jwt.verify(token, SECRET_ACCESS_TOKEN)
+    console.log(decoded)
+    return {
+      isValid: true,
+    }
   } catch (err) {
     return {
       isValid: false,
@@ -388,7 +388,7 @@ const verifyToken = (token) => {
 
 const jwt = require('jsonwebtoken')
 const SECRET_ACCESS_TOKEN = 'access_secret_key'
-require('dotenv').config({path : './.env'})
+require('dotenv').config({ path: './.env' })
 const Login = async (request, h) => {
   const { username, password } = request.payload
   const getPass = process.env.PASS
@@ -408,7 +408,7 @@ const Login = async (request, h) => {
       username: username
     },
     SECRET_ACCESS_TOKEN,
-    {'expiresIn': 14 * 24 * 60 * 60 }
+    { expiresIn: 14 * 24 * 60 * 60 }
   )
 
   return h.response({ token: access_token }).code(201)
@@ -417,11 +417,9 @@ const Login = async (request, h) => {
 const checkToken = (request, h) => {
   const { token } = request.payload
 
-  const decodedToken = Jwt.token.decode(token)
+  const verify = verifyToken(token)
 
-  const verify = verifyToken(decodedToken)
-
-  console.log(verify.isValid)
+  console.log('hasil', verify)
   return verify.isValid
     ? h.response({ token: token }).code(201)
     : h.response({}).code(404)
