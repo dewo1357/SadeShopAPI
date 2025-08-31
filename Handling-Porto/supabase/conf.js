@@ -1,8 +1,8 @@
 const {createClient} = require('@supabase/supabase-js')
 require('dotenv').config({path : './.env'})
 
-const url = process.env.url
-const anon_key = process.env.anon_key_porto
+const url = process.env.URL
+const anon_key = process.env.ANON_KEY_PORTO
 
 console.log("url", url)
 console.log("Anon key : ", anon_key)
