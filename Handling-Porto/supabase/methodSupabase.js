@@ -1,4 +1,4 @@
-const { supabase } = require('../../supabaseControl/supabase')
+const { supabase } = require('./conf')
 
 const InsertData = async (table, data) => {
   const { error } = await supabase.from(table).insert(data)
@@ -14,6 +14,7 @@ const GetData = async table => {
     .select('*')
     .order('created_at', { ascending: false })
   if (error) {
+    console.log(error)
     return false
   }
   return data

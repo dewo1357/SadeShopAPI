@@ -297,6 +297,7 @@ const deleteBlog = async (request, h) => {
 
 // GET All
 const getExperiences = async (request, h) => {
+  console.log("okokok")
   const Data = await GetData('Experience')
   if (!Data) {
     return h.response({ status: 'failed' }).code(400)
@@ -446,7 +447,7 @@ const EditProfileData = async (request, h) => {
 
 const Fs = require('fs')
 const Path = require('path')
-const { supabase } = require('../supabase')
+const { supabase } = require('./supabase/conf')
 const UploadImageProfile = async (request, h) => {
   const file = request.payload.image // field "image"
   const oldFile = request.payload.oldFile // nama file lama (misalnya disimpan di DB/frontend)

@@ -575,17 +575,7 @@ const routes = [
   },
 
   //////////////////////////PORTOFOLIO ROUTE////////////////////////
-  {
-    method: 'GET',
-    path: '/',
-    handler: (request, h) => {
-      return h
-        .response({
-          status: 'Success'
-        })
-        .code(201)
-    }
-  },
+  
   {
     method: 'GET',
     path: '/api/experiences',

@@ -14,8 +14,8 @@ const SECRET_ACCESS_TOKEN = 'access_secret_key';
 
 const init = async () => {
     const server = Hapi.server({
-        host: '0.0.0.0',
-        port: process.env.PORT || 5000,
+        host: '0.0.0.0' , //'localhost
+        port: process.env.PORT || 3000,
         routes: {
             cors: {
                 origin: ['*']
